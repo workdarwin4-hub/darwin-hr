@@ -13,58 +13,54 @@
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-400" id="companyTitleName">لوحة إدارة الشركة</h1>
-                <p class="text-slate-400 text-sm">إدارة الفروع المتعددة، الموظفين، وسجلات البصمة</p>
+                <p class="text-slate-400 text-sm">إدارة الفروع، الموظفين، وحساب الرواتب باليومية</p>
             </div>
             <div class="flex gap-3">
-                <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">تطبيق الموظفين (البصمة)</a>
+                <button onclick="exportPayrollSheet()" class="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-lg text-sm font-bold shadow-lg">📊 تصدير شيت الرواتب (Excel)</button>
+                <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">تطبيق الموظفين</a>
                 <a href="index.html" class="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">خروج</a>
             </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- إدارة الفروع والمقرات المتعددة -->
+            <!-- إدارة الفروع -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">🏢 إضافة فروع ومقرات عمل متعددة</h2>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">🏢 إضافة فروع ومقرات العمل</h2>
                 <div class="space-y-3">
-                    <input type="text" id="branchName" placeholder="اسم الفرع (مثال: فرع التجمع، مخزن الجيزة)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <input type="text" id="branchName" placeholder="اسم الفرع (مثال: فرع القاهرة)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <div class="grid grid-cols-2 gap-2">
                         <input type="text" id="branchLat" placeholder="خط العرض (Lat)" class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                         <input type="text" id="branchLng" placeholder="خط الطول (Lng)" class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     </div>
-                    <button onclick="getCurrentLocationForBranch()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2 rounded-lg text-sm">📍 جلب موقعي الحالي للفرع</button>
-                    <button onclick="addBranch()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-lg text-sm">حفظ وإضافة الفرع</button>
+                    <button onclick="getCurrentLocationForBranch()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2 rounded-lg text-sm">📍 جلب موقعي الحالي</button>
+                    <button onclick="addBranch()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-lg text-sm">حفظ الفرع</button>
                 </div>
             </div>
 
-            <!-- إضافة موظف وتحديد فرعه -->
+            <!-- إضافة موظف وتحديد أجر اليومية -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف وتعيين فرعه</h2>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف وتحديد أجر اليومية</h2>
                 <div class="space-y-3">
                     <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <input type="text" id="empPhone" placeholder="رقم الهاتف" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <input type="text" id="empNationalId" placeholder="رقم البطاقة" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <input type="number" id="empDailyRate" placeholder="قيمة أجر اليومية (مثال: 300 جنية)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <select id="empBranchSelect" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                        <option value="">اختر الفرع التابع له الموظف</option>
-                    </select>
-                    <select id="empRole" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                        <option value="employee">موظف عادي</option>
-                        <option value="supervisor">مشرف</option>
-                        <option value="admin">أدمن الشركة</option>
+                        <option value="">اختر الفرع التابع له</option>
                     </select>
                     <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-lg text-sm">تسجيل الموظف</button>
                 </div>
             </div>
         </div>
 
-        <!-- قائمة الفروع المسجلة -->
+        <!-- قائمة الفروع -->
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl mb-8">
-            <h2 class="text-xl font-bold mb-4">الفروع والمقرات المسجلة للشركة</h2>
+            <h2 class="text-xl font-bold mb-4">الفروع المسجلة</h2>
             <div id="branchesList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </div>
 
-        <!-- جدول الموظفين -->
+        <!-- جدول الموظفين وأجورهم -->
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl mb-8">
-            <h2 class="text-xl font-bold mb-4">قائمة الموظفين</h2>
+            <h2 class="text-xl font-bold mb-4">قائمة الموظفين وأجور اليوميات</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
@@ -72,31 +68,12 @@
                             <th class="p-3">HR ID</th>
                             <th class="p-3">الاسم</th>
                             <th class="p-3">الهاتف</th>
-                            <th class="p-3">الفرع المخصص</th>
-                            <th class="p-3">الصلاحية (تعديل مباشر)</th>
+                            <th class="p-3">أجر اليومية</th>
+                            <th class="p-3">الفرع</th>
                             <th class="p-3">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="employeesTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- سجلات البصمة -->
-        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-            <h2 class="text-xl font-bold mb-4">📸 سجلات الحضور والانصراف بالصور</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead>
-                        <tr class="border-b border-slate-700 text-slate-400">
-                            <th class="p-3">صورة البصمة</th>
-                            <th class="p-3">اسم الموظف</th>
-                            <th class="p-3">الكود</th>
-                            <th class="p-3">النوع</th>
-                            <th class="p-3">الوقت والتاريخ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceLogsTable"></tbody>
                 </table>
             </div>
         </div>
@@ -109,26 +86,26 @@
 
         document.getElementById('companyTitleName').innerText = "لوحة تحكم الشركة: " + currentCompany;
 
+        let globalEmployees = {};
+        let globalAttendance = [];
+
         window.getCurrentLocationForBranch = function() {
             if(!navigator.geolocation) { alert("المتصفح لا يدعم الـ GPS"); return; }
             navigator.geolocation.getCurrentPosition((pos) => {
                 document.getElementById('branchLat').value = pos.coords.latitude;
                 document.getElementById('branchLng').value = pos.coords.longitude;
                 alert("تم جلب إحداثيات الفرع بنجاح!");
-            }, () => { alert("تعذر تحديد الموقع."); });
+            });
         }
 
         window.addBranch = function() {
             const name = document.getElementById('branchName').value.trim();
             const lat = document.getElementById('branchLat').value.trim();
             const lng = document.getElementById('branchLng').value.trim();
-
             if(!name || !lat || !lng) { alert('أدخل اسم الفرع والإحداثيات'); return; }
 
             const branchId = 'BR-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-            set(ref(database, `companiesData/${currentCompany}/branches/${branchId}`), {
-                branchId, name, lat, lng
-            }).then(() => {
+            set(ref(database, `companiesData/${currentCompany}/branches/${branchId}`), { branchId, name, lat, lng }).then(() => {
                 alert('تم إضافة الفرع بنجاح');
                 document.getElementById('branchName').value = '';
                 document.getElementById('branchLat').value = '';
@@ -139,34 +116,24 @@
         onValue(ref(database, `companiesData/${currentCompany}/branches`), (snapshot) => {
             const select = document.getElementById('empBranchSelect');
             const container = document.getElementById('branchesList');
-            select.innerHTML = '<option value="">اختر الفرع التابع له الموظف</option>';
+            select.innerHTML = '<option value="">اختر الفرع التابع له</option>';
             container.innerHTML = '';
-
             if(snapshot.exists()) {
                 snapshot.forEach(child => {
                     const b = child.val();
                     select.innerHTML += `<option value="${b.branchId}">${b.name}</option>`;
-                    container.innerHTML += `
-                        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700">
-                            <h3 class="font-bold text-blue-400">${b.name}</h3>
-                            <p class="text-xs text-slate-400 mt-1">Lat: ${b.lat}</p>
-                            <p class="text-xs text-slate-400">Lng: ${b.lng}</p>
-                        </div>
-                    `;
+                    container.innerHTML += `<div class="p-4 bg-slate-900 rounded-xl border border-slate-700"><h3 class="font-bold text-blue-400">${b.name}</h3></div>`;
                 });
-            } else {
-                container.innerHTML = '<p class="text-slate-500 text-sm">لا توجد فروع مسجلة حتى الآن.</p>';
             }
         });
 
         window.addEmployee = function() {
             const name = document.getElementById('empName').value.trim();
             const phone = document.getElementById('empPhone').value.trim();
-            const nationalId = document.getElementById('empNationalId').value.trim();
+            const dailyRate = Number(document.getElementById('empDailyRate').value) || 0;
             const branchId = document.getElementById('empBranchSelect').value;
-            const role = document.getElementById('empRole').value;
             
-            if(!name || !phone || !nationalId || !branchId) { alert('أدخل كافة البيانات واختار الفرع'); return; }
+            if(!name || !phone || !branchId) { alert('أدخل كافة البيانات الأساسية'); return; }
 
             get(ref(database, `companiesData/${currentCompany}/employees`)).then((snapshot) => {
                 let nextId = 1000;
@@ -176,12 +143,12 @@
                 }
 
                 set(ref(database, `companiesData/${currentCompany}/employees/${nextId}`), {
-                    name, phone, nationalId, branchId, empId: nextId.toString(), role, status: 'active', profileImg: ''
+                    name, phone, dailyRate, branchId, empId: nextId.toString(), status: 'active', profileImg: ''
                 }).then(() => {
-                    alert('تم تسجيل الموظف بنجاح برقم HR ID: ' + nextId);
+                    alert('تم تسجيل الموظف برقم HR ID: ' + nextId);
                     document.getElementById('empName').value = '';
                     document.getElementById('empPhone').value = '';
-                    document.getElementById('empNationalId').value = '';
+                    document.getElementById('empDailyRate').value = '';
                 });
             });
         }
@@ -190,64 +157,60 @@
             const tbody = document.getElementById('employeesTable');
             tbody.innerHTML = '';
             if(snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    const emp = child.val();
+                globalEmployees = snapshot.val();
+                Object.values(globalEmployees).forEach(emp => {
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-700/50">
                             <td class="p-3 font-mono text-blue-400 font-bold">${emp.empId}</td>
                             <td class="p-3 font-bold">${emp.name}</td>
                             <td class="p-3">${emp.phone}</td>
-                            <td class="p-3 font-mono text-amber-400">${emp.branchId}</td>
-                            <td class="p-3">
-                                <select onchange="updateRole('${emp.empId}', this.value)" class="bg-slate-900 border border-slate-700 p-2 rounded text-xs text-white">
-                                    <option value="employee" ${emp.role === 'employee' ? 'selected' : ''}>موظف عادي (Employee)</option>
-                                    <option value="supervisor" ${emp.role === 'supervisor' ? 'selected' : ''}>مشرف (Supervisor)</option>
-                                    <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>أدمن الشركة (Admin)</option>
-                                </select>
-                            </td>
-                            <td class="p-3">
-                                <button onclick="toggleBlock('${emp.empId}', '${emp.status}')" class="px-2 py-1 rounded text-xs ${emp.status==='active'?'bg-red-600':'bg-emerald-600'}">
-                                    ${emp.status==='active'?'حظر':'تفعيل'}
-                                </button>
-                            </td>
+                            <td class="p-3 text-emerald-400 font-bold">${emp.dailyRate || 0} جنية/يوم</td>
+                            <td class="p-3 font-mono">${emp.branchId}</td>
+                            <td class="p-3"><button onclick="toggleBlock('${emp.empId}', '${emp.status}')" class="px-2 py-1 rounded text-xs ${emp.status==='active'?'bg-red-600':'bg-emerald-600'}">${emp.status==='active'?'حظر':'تفعيل'}</button></td>
                         </tr>
                     `;
                 });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد موظفين</td></tr>';
             }
         });
 
-        window.updateRole = function(empId, newRole) {
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role: newRole }).then(() => {
-                alert('تم تحديث صلاحية الموظف بنجاح!');
+        onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
+            globalAttendance = [];
+            if(snapshot.exists()) {
+                snapshot.forEach(child => { globalAttendance.push(child.val()); });
+            }
+        });
+
+        // تصدير شيت الرواتب (أيام الحضور × أجر اليومية)
+        window.exportPayrollSheet = function() {
+            let csvContent = "\uFEFFHR ID,اسم الموظف,أجر اليومية,عدد أيام الحضور,إجمالي المستحق\n";
+            
+            Object.values(globalEmployees).forEach(emp => {
+                let attendedDays = new Set();
+                globalAttendance.forEach(log => {
+                    if(log.empId === emp.empId && log.type === 'دخول') {
+                        attendedDays.add(log.time.split(',')[0]);
+                    }
+                });
+
+                let daysCount = attendedDays.size;
+                let totalNet = daysCount * (emp.dailyRate || 0);
+
+                csvContent += `${emp.empId},"${emp.name}",${emp.dailyRate || 0},${daysCount},${totalNet}\n`;
             });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `Darwin_Daily_Payroll_${currentCompany}_${new Date().toLocaleDateString()}.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         window.toggleBlock = function(empId, status) {
             update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { status: status === 'active' ? 'blocked' : 'active' });
         }
-
-        onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
-            const tbody = document.getElementById('attendanceLogsTable');
-            tbody.innerHTML = '';
-            if(snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    const log = child.val();
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-700/50">
-                            <td class="p-3"><img src="${log.faceImage || ''}" class="w-12 h-12 rounded-full object-cover border border-blue-500"></td>
-                            <td class="p-3 font-bold">${log.name}</td>
-                            <td class="p-3 font-mono text-blue-400">${log.empId}</td>
-                            <td class="p-3"><span class="px-2 py-1 rounded text-xs ${log.type==='دخول'?'bg-blue-900 text-blue-300':'bg-amber-900 text-amber-300'}">${log.type}</span></td>
-                            <td class="p-3">${log.time}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد سجلات حضور</td></tr>';
-            }
-        });
     </script>
 </body>
 </html>
