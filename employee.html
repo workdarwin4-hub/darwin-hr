@@ -3,28 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - تطبيق الحضور للبصمة</title>
+    <title>DARWIN HR - تطبيق الموظفين والبصمة</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
 <body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
     <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700 text-center">
-        <h1 class="text-2xl font-bold text-blue-400 mb-2">تسجيل الحضور والانصراف</h1>
-        <p class="text-xs text-slate-400 mb-6">بصمة الوجه والموقع الجغرافي المعتمد</p>
+        <h1 class="text-2xl font-bold text-blue-400 mb-2">بصمة الوجه والموقع الجغرافي</h1>
+        <p class="text-xs text-slate-400 mb-6">سجل حضورك بداخل نطاق العمل المعتمد</p>
 
         <div id="loginStep" class="space-y-4">
             <input type="text" id="phoneInput" placeholder="رقم الهاتف المسجل" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-center">
-            <input type="text" id="hrIdInput" placeholder="كود الـ HR ID الخاص بك" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-center uppercase">
-            <button onclick="verifyEmployee()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-lg">التحقق وتسجيل البصمة</button>
+            <input type="text" id="hrIdInput" placeholder="كود الـ HR ID (يبدأ من 1000)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-center">
+            <button onclick="verifyEmployee()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-lg">التالي (التحقق)</button>
         </div>
 
         <div id="attendanceStep" class="hidden space-y-4">
-            <div class="p-4 bg-slate-900 rounded-xl border border-slate-700 text-right">
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-700 text-right">
                 <p class="text-sm">مرحباً، <span id="empDisplayName" class="font-bold text-emerald-400"></span></p>
-                <p class="text-xs text-slate-400 mt-1">الحالة: جاهز لتسجيل البصمة داخل النطاق المحدد.</p>
             </div>
-            <button onclick="submitAttendance()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-lg shadow-lg">📸 تسجيل الحضور الآن</button>
+            
+            <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black">
+                <video id="videoElement" autoplay playsinline class="w-full h-64 object-cover"></video>
+                <canvas id="canvasElement" class="hidden"></canvas>
+            </div>
+
+            <button onclick="captureAndSubmit()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-lg shadow-lg">📸 التقاط وبصم الحضور الآن</button>
         </div>
     </div>
 
@@ -32,12 +37,13 @@
         import { database, ref, get, push } from "./firebase-config.js";
         const currentCompany = localStorage.getItem('darwin_current_company');
         let currentEmpData = null;
+        let videoStream = null;
 
         window.verifyEmployee = function() {
             const phone = document.getElementById('phoneInput').value.trim();
-            const hrId = document.getElementById('hrIdInput').value.trim().toUpperCase();
+            const hrId = document.getElementById('hrIdInput').value.trim();
 
-            if(!phone || !hrId) { alert('أدخل رقم الهاتف والـ HR ID'); return; }
+            if(!phone || !hrId) { alert('أدخل الهاتف والـ HR ID'); return; }
 
             get(ref(database, `companiesData/${currentCompany}/employees/${hrId}`)).then((snapshot) => {
                 if(snapshot.exists()) {
@@ -47,8 +53,9 @@
                         document.getElementById('empDisplayName').innerText = emp.name;
                         document.getElementById('loginStep').classList.add('hidden');
                         document.getElementById('attendanceStep').classList.remove('hidden');
+                        startCamera();
                     } else {
-                        alert('البيانات غير مطابقة أو أن الحساب محظور.');
+                        alert('بيانات غير صحيحة أو أن الحساب موقوف.');
                     }
                 } else {
                     alert('لم يتم العثور على الموظف بهذا الكود!');
@@ -56,7 +63,16 @@
             });
         }
 
-        window.submitAttendance = function() {
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+                videoStream = stream;
+                document.getElementById('videoElement').srcObject = stream;
+            }).catch(() => {
+                alert('فشل تشغيل كاميرا الجهاز للتحقق من الوجه.');
+            });
+        }
+
+        window.captureAndSubmit = function() {
             if (!navigator.geolocation) {
                 alert("المتصفح لا يدعم تحديد الموقع الجغرافي");
                 return;
@@ -66,33 +82,39 @@
                 const userLat = position.coords.latitude;
                 const userLng = position.coords.longitude;
 
-                // جلب إطارات مكان العمل من الفايرباس للتحقق من الزون
                 get(ref(database, `companiesData/${currentCompany}/settings/location`)).then((snapshot) => {
                     if(snapshot.exists()) {
                         const target = snapshot.val();
-                        // حساب التقريب الجغرافي البسيط (أو السماح لو في النطاق القريب)
                         const distance = Math.abs(target.lat - userLat) + Math.abs(target.lng - userLng);
                         
-                        // النطاق المسموح (تقريبي مسافة آمنة)
-                        if(distance < 0.05) { 
+                        if(distance < 0.05) {
+                            const video = document.getElementById('videoElement');
+                            const canvas = document.getElementById('canvasElement');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const faceImage = canvas.toDataURL('image/png');
+
                             push(ref(database, `companiesData/${currentCompany}/attendance`), {
                                 empId: currentEmpData.empId,
                                 name: currentEmpData.name,
                                 time: new Date().toLocaleString(),
-                                type: 'حضور'
+                                faceImage: faceImage
                             }).then(() => {
-                                alert('تم تسجيل الحضور بنجاح وصورة الوجه مقبولة داخل النطاق!');
+                                alert('تم تسجيل الحضور وبصمة الوجه بنجاح داخل النطاق!');
+                                if(videoStream) videoStream.getTracks().forEach(track => track.stop());
                                 location.reload();
                             });
                         } else {
-                            alert('عذراً، أنت خارج النطاق الجغرافي (الزون) المخصص للعمل!');
+                            alert('عذراً، أنت خارج النطاق الجغرافي (الزون) المخصص للشركة!');
                         }
                     } else {
-                        alert('لم يتم تحديد نطاق العمل من قبل الإدارة بعد.');
+                        alert('لم تقم الإدارة بتحديد إحداثيات موقع العمل بعد.');
                     }
                 });
             }, () => {
-                alert('فشل تحديد موقعك الجغرافي. تأكد من تفعيل الـ GPS.');
+                alert('يرجى السماح بتحديد الموقع الجغرافي (GPS).');
             });
         }
     </script>
