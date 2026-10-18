@@ -13,7 +13,7 @@
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-400" id="companyTitleName">لوحة إدارة الشركة</h1>
-                <p class="text-slate-400 text-sm">إدارة الموظفين، نطاق الخريطة، ومتابعة سجلات البصمة بالصور</p>
+                <p class="text-slate-400 text-sm">إدارة الفروع المتعددة، الموظفين، وسجلات البصمة</p>
             </div>
             <div class="flex gap-3">
                 <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">تطبيق الموظفين (البصمة)</a>
@@ -21,37 +21,51 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- إدارة الفروع والمواقع المتعددة -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">📍 نطاق الخريطة (Geofencing)</h2>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">🏢 إضافة فروع ومقرات عمل متعددة</h2>
                 <div class="space-y-3">
-                    <input type="text" id="workLat" placeholder="خط العرض (Latitude)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <input type="text" id="workLng" placeholder="خط الطول (Longitude)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <button onclick="saveLocation()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-lg text-sm">حفظ مركز العمل</button>
+                    <input type="text" id="branchName" placeholder="اسم الفرع (مثال: فرع التجمع، مخزن الجيزة)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="branchLat" placeholder="خط العرض (Lat)" class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                        <input type="text" id="branchLng" placeholder="خط الطول (Lng)" class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    </div>
+                    <button onclick="getCurrentLocationForBranch()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2 rounded-lg text-sm">📍 جلب موقعي الحالي للفرع</button>
+                    <button onclick="addBranch()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-lg text-sm">حفظ وإضافة الفرع</button>
                 </div>
             </div>
 
+            <!-- إضافة موظف وتحديد فرعه -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف جديد (HR ID يبدأ من 1000)</h2>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف وتعيين فرعه</h2>
                 <div class="space-y-3">
                     <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <input type="text" id="empPhone" placeholder="رقم الهاتف" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <input type="text" id="empNationalId" placeholder="رقم البطاقة (14 رقم)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <input type="text" id="empNationalId" placeholder="رقم البطاقة" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <select id="empBranchSelect" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                        <option value="">اختر الفرع التابع له الموظف</option>
+                    </select>
+                    <select id="empRole" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                        <option value="employee">موظف عادي</option>
+                        <option value="supervisor">مشرف</option>
+                    </select>
                     <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-lg text-sm">تسجيل الموظف</button>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">🔍 بحث متقدم عن موظف</h2>
-                <div class="space-y-3">
-                    <input type="text" id="searchQuery" oninput="filterEmployees()" placeholder="ابحث بالاسم، الكود، الهاتف، أو البطاقة..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <p class="text-xs text-slate-400">النتائج تظهر فوراً في الجدول أدناه.</p>
                 </div>
             </div>
         </div>
 
+        <!-- قائمة الفروع المسجلة -->
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl mb-8">
-            <h2 class="text-xl font-bold mb-4">قائمة العمال والموظفين</h2>
+            <h2 class="text-xl font-bold mb-4">الفروع والمقرات المسجلة للشركة</h2>
+            <div id="branchesList" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- يتم جلب الفروع هنا -->
+            </div>
+        </div>
+
+        <!-- جدول الموظفين -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl mb-8">
+            <h2 class="text-xl font-bold mb-4">قائمة الموظفين</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
@@ -59,9 +73,9 @@
                             <th class="p-3">HR ID</th>
                             <th class="p-3">الاسم</th>
                             <th class="p-3">الهاتف</th>
-                            <th class="p-3">رقم البطاقة</th>
+                            <th class="p-3">الفرع المخصص</th>
                             <th class="p-3">الصلاحية</th>
-                            <th class="p-3">الإجراءات</th>
+                            <th class="p-3">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="employeesTable"></tbody>
@@ -69,8 +83,9 @@
             </div>
         </div>
 
+        <!-- سجلات البصمة -->
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-            <h2 class="text-xl font-bold mb-4">📸 سجلات الحضور اليومية وصور بصمة الوجه</h2>
+            <h2 class="text-xl font-bold mb-4">📸 سجلات الحضور والانصراف بالصور</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
@@ -78,8 +93,8 @@
                             <th class="p-3">صورة البصمة</th>
                             <th class="p-3">اسم الموظف</th>
                             <th class="p-3">الكود</th>
-                            <th class="p-3">وقت البصمة</th>
-                            <th class="p-3">الحالة</th>
+                            <th class="p-3">النوع</th>
+                            <th class="p-3">الوقت والتاريخ</th>
                         </tr>
                     </thead>
                     <tbody id="attendanceLogsTable"></tbody>
@@ -94,22 +109,66 @@
         if(!currentCompany) window.location.href = 'index.html';
 
         document.getElementById('companyTitleName').innerText = "لوحة تحكم الشركة: " + currentCompany;
-        let allEmployeesData = {};
 
-        window.saveLocation = function() {
-            const lat = document.getElementById('workLat').value;
-            const lng = document.getElementById('workLng').value;
-            set(ref(database, `companiesData/${currentCompany}/settings/location`), { lat, lng }).then(() => {
-                alert('تم حفظ إحداثيات الخريطة بنجاح');
+        window.getCurrentLocationForBranch = function() {
+            if(!navigator.geolocation) { alert("المتصفح لا يدعم الـ GPS"); return; }
+            navigator.geolocation.getCurrentPosition((pos) => {
+                document.getElementById('branchLat').value = pos.coords.latitude;
+                document.getElementById('branchLng').value = pos.coords.longitude;
+                alert("تم جلب إحداثيات الفرع بنجاح!");
+            }, () => { alert("تعذر تحديد الموقع."); });
+        }
+
+        window.addBranch = function() {
+            const name = document.getElementById('branchName').value.trim();
+            const lat = document.getElementById('branchLat').value.trim();
+            const lng = document.getElementById('branchLng').value.trim();
+
+            if(!name || !lat || !lng) { alert('أدخل اسم الفرع والإحداثيات'); return; }
+
+            const branchId = 'BR-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+            set(ref(database, `companiesData/${currentCompany}/branches/${branchId}`), {
+                branchId, name, lat, lng
+            }).then(() => {
+                alert('تم إضافة الفرع بنجاح');
+                document.getElementById('branchName').value = '';
+                document.getElementById('branchLat').value = '';
+                document.getElementById('branchLng').value = '';
             });
         }
+
+        // جلب الفروع لعرضها في القائمة المنسدلة وفي البطاقات
+        onValue(ref(database, `companiesData/${currentCompany}/branches`), (snapshot) => {
+            const select = document.getElementById('empBranchSelect');
+            const container = document.getElementById('branchesList');
+            select.innerHTML = '<option value="">اختر الفرع التابع له الموظف</option>';
+            container.innerHTML = '';
+
+            if(snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const b = child.val();
+                    select.innerHTML += `<option value="${b.branchId}">${b.name}</option>`;
+                    container.innerHTML += `
+                        <div class="p-4 bg-slate-900 rounded-xl border border-slate-700">
+                            <h3 class="font-bold text-blue-400">${b.name}</h3>
+                            <p class="text-xs text-slate-400 mt-1">Lat: ${b.lat}</p>
+                            <p class="text-xs text-slate-400">Lng: ${b.lng}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = '<p class="text-slate-500 text-sm">لا توجد فروع مسجلة حتى الآن.</p>';
+            }
+        });
 
         window.addEmployee = function() {
             const name = document.getElementById('empName').value.trim();
             const phone = document.getElementById('empPhone').value.trim();
             const nationalId = document.getElementById('empNationalId').value.trim();
+            const branchId = document.getElementById('empBranchSelect').value;
+            const role = document.getElementById('empRole').value;
             
-            if(!name || !phone || !nationalId) { alert('أدخل كافة البيانات'); return; }
+            if(!name || !phone || !nationalId || !branchId) { alert('أدخل كافة البيانات واختار الفرع'); return; }
 
             get(ref(database, `companiesData/${currentCompany}/employees`)).then((snapshot) => {
                 let nextId = 1000;
@@ -119,9 +178,9 @@
                 }
 
                 set(ref(database, `companiesData/${currentCompany}/employees/${nextId}`), {
-                    name, phone, nationalId, empId: nextId.toString(), role: 'employee', status: 'active'
+                    name, phone, nationalId, branchId, empId: nextId.toString(), role, status: 'active', profileImg: ''
                 }).then(() => {
-                    alert('تم تسجيل الموظف برقم HR ID: ' + nextId);
+                    alert('تم تسجيل الموظف بنجاح برقم HR ID: ' + nextId);
                     document.getElementById('empName').value = '';
                     document.getElementById('empPhone').value = '';
                     document.getElementById('empNationalId').value = '';
@@ -130,54 +189,30 @@
         }
 
         onValue(ref(database, `companiesData/${currentCompany}/employees`), (snapshot) => {
-            if(snapshot.exists()) {
-                allEmployeesData = snapshot.val();
-                renderEmployees(allEmployeesData);
-            } else {
-                document.getElementById('employeesTable').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد موظفين مسجلين</td></tr>';
-            }
-        });
-
-        function renderEmployees(data) {
             const tbody = document.getElementById('employeesTable');
             tbody.innerHTML = '';
-            Object.values(data).forEach(emp => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-700/50">
-                        <td class="p-3 font-mono text-blue-400 font-bold">${emp.empId}</td>
-                        <td class="p-3 font-bold">${emp.name}</td>
-                        <td class="p-3">${emp.phone}</td>
-                        <td class="p-3">${emp.nationalId}</td>
-                        <td class="p-3">
-                            <select onchange="updateRole('${emp.empId}', this.value)" class="bg-slate-900 border border-slate-700 p-1 rounded text-xs">
-                                <option value="employee" ${emp.role==='employee'?'selected':''}>موظف عادي</option>
-                                <option value="admin" ${emp.role==='admin'?'selected':''}>مشرف / أدمن فرعي</option>
-                            </select>
-                        </td>
-                        <td class="p-3">
-                            <button onclick="toggleBlock('${emp.empId}', '${emp.status}')" class="px-2 py-1 rounded text-xs ${emp.status==='active'?'bg-red-600':'bg-emerald-600'}">
-                                ${emp.status==='active'?'حظر':'تفعيل'}
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        window.filterEmployees = function() {
-            const query = document.getElementById('searchQuery').value.toLowerCase();
-            const filtered = {};
-            Object.values(allEmployeesData).forEach(emp => {
-                if(emp.name.toLowerCase().includes(query) || emp.empId.includes(query) || emp.phone.includes(query) || emp.nationalId.includes(query)) {
-                    filtered[emp.empId] = emp;
-                }
-            });
-            renderEmployees(filtered);
-        }
-
-        window.updateRole = function(empId, role) {
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role });
-        }
+            if(snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const emp = child.val();
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-700/50">
+                            <td class="p-3 font-mono text-blue-400 font-bold">${emp.empId}</td>
+                            <td class="p-3 font-bold">${emp.name}</td>
+                            <td class="p-3">${emp.phone}</td>
+                            <td class="p-3 font-mono text-amber-400">${emp.branchId}</td>
+                            <td class="p-3">${emp.role}</td>
+                            <td class="p-3">
+                                <button onclick="toggleBlock('${emp.empId}', '${emp.status}')" class="px-2 py-1 rounded text-xs ${emp.status==='active'?'bg-red-600':'bg-emerald-600'}">
+                                    ${emp.status==='active'?'حظر':'تفعيل'}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد موظفين</td></tr>';
+            }
+        });
 
         window.toggleBlock = function(empId, status) {
             update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { status: status === 'active' ? 'blocked' : 'active' });
@@ -191,16 +226,16 @@
                     const log = child.val();
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-700/50">
-                            <td class="p-3"><img src="${log.faceImage || ''}" class="w-12 h-12 rounded-full object-cover border border-blue-500" alt="صورة البصمة"></td>
+                            <td class="p-3"><img src="${log.faceImage || ''}" class="w-12 h-12 rounded-full object-cover border border-blue-500"></td>
                             <td class="p-3 font-bold">${log.name}</td>
                             <td class="p-3 font-mono text-blue-400">${log.empId}</td>
+                            <td class="p-3"><span class="px-2 py-1 rounded text-xs ${log.type==='دخول'?'bg-blue-900 text-blue-300':'bg-amber-900 text-amber-300'}">${log.type}</span></td>
                             <td class="p-3">${log.time}</td>
-                            <td class="p-3"><span class="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">حضور مؤكد</span></td>
                         </tr>
                     `;
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد سجلات حضور حتى الآن</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد سجلات حضور</td></tr>';
             }
         });
     </script>
