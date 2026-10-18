@@ -9,125 +9,180 @@
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen p-6">
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-400" id="companyTitleName">لوحة إدارة الشركة</h1>
-                <p class="text-slate-400 text-sm">إدارة العمال، نطاق البصمة، والطلبات</p>
+                <p class="text-slate-400 text-sm">إدارة الموظفين، نطاق الخريطة، ومتابعة سجلات البصمة بالصور</p>
             </div>
             <div class="flex gap-3">
-                <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">فتح تطبيق الموظفين</a>
+                <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-sm font-bold">تطبيق الموظفين (البصمة)</a>
                 <a href="index.html" class="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold">خروج</a>
             </div>
         </header>
 
-        <!-- إعدادات النطاق الجغرافي والعمال -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- الإعدادات والبحث -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- النطاق الجغرافي -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">📍 تحديد نطاق العمل (Geofencing)</h2>
-                <p class="text-xs text-slate-400 mb-4">حدد إحداثيات مكان العمل المسموح للموظفين البصم من داخله فقط.</p>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">📍 نطاق الخريطة (Geofencing)</h2>
                 <div class="space-y-3">
                     <input type="text" id="workLat" placeholder="خط العرض (Latitude)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <input type="text" id="workLng" placeholder="خط الطول (Longitude)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <button onclick="saveLocation()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-lg text-sm">حفظ النطاق الجغرافي</button>
+                    <button onclick="saveLocation()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-lg text-sm">حفظ مركز العمل</button>
                 </div>
             </div>
 
+            <!-- إضافة موظف -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف جديد</h2>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف جديد (HR ID يبدأ من 1000)</h2>
                 <div class="space-y-3">
                     <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <input type="text" id="empPhone" placeholder="رقم الهاتف (رقم الموبايل)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <input type="text" id="empNationalId" placeholder="رقم البطاقة الشخصية" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-lg text-sm">إضافة وتسجيل الموظف</button>
+                    <input type="text" id="empPhone" placeholder="رقم الهاتف (SMS Code)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <input type="text" id="empNationalId" placeholder="رقم البطاقة (14 رقم)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-lg text-sm">تسجيل الموظف</button>
+                </div>
+            </div>
+
+            <!-- البحث عن موظف -->
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <h2 class="text-lg font-bold mb-4 text-blue-300">🔍 بحث متقدم عن موظف</h2>
+                <div class="space-y-3">
+                    <input type="text" id="searchQuery" oninput="filterEmployees()" placeholder="ابحث بالاسم، الكود، الهاتف، أو البطاقة..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <p class="text-xs text-slate-400">النتائج تظهر فوراً في جدول الموظفين أدناه.</p>
                 </div>
             </div>
         </div>
 
-        <!-- جدول الموظفين وحالة الحضور -->
-        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-            <h2 class="text-xl font-bold mb-4">قائمة العمال والموظفين المسجلين</h2>
+        <!-- جدول الموظفين -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl mb-8">
+            <h2 class="text-xl font-bold mb-4">قائمة العمال والموظفين</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
                         <tr class="border-b border-slate-700 text-slate-400">
-                            <th class="p-3">اسم الموظف</th>
-                            <th class="p-3">رقم الهاتف</th>
+                            <th class="p-3">HR ID</th>
+                            <th class="p-3">الاسم</th>
+                            <th class="p-3">الهاتف</th>
                             <th class="p-3">رقم البطاقة</th>
-                            <th class="p-3">الصلاحية / الترقية</th>
-                            <th class="p-3">حظر / إلغاء حظر</th>
+                            <th class="p-3">الصلاحية</th>
+                            <th class="p-3">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="employeesTable"></tbody>
                 </table>
             </div>
         </div>
+
+        <!-- سجلات الحضور وصور بصمة الوجه -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+            <h2 class="text-xl font-bold mb-4">📸 سجلات الحضور اليومية وصور بصمة الوجه</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400">
+                            <th class="p-3">صورة البصمة</th>
+                            <th class="p-3">اسم الموظف</th>
+                            <th class="p-3">الكود</th>
+                            <th class="p-3">وقت البصمة</th>
+                            <th class="p-3">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceLogsTable"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script type="module">
-        import { database, ref, set, onValue, update } from "./firebase-config.js";
+        import { database, ref, set, get, onValue, update } from "./firebase-config.js";
         const currentCompany = localStorage.getItem('darwin_current_company');
-        
-        if(!currentCompany) {
-            window.location.href = 'index.html';
-        }
+        if(!currentCompany) window.location.href = 'index.html';
 
         document.getElementById('companyTitleName').innerText = "لوحة تحكم الشركة: " + currentCompany;
+
+        let allEmployeesData = {};
 
         window.saveLocation = function() {
             const lat = document.getElementById('workLat').value;
             const lng = document.getElementById('workLng').value;
             set(ref(database, `companiesData/${currentCompany}/settings/location`), { lat, lng }).then(() => {
-                alert('تم حفظ النطاق الجغرافي بنجاح');
+                alert('تم حفظ إحداثيات الخريطة بنجاح');
             });
         }
 
         window.addEmployee = function() {
-            const name = document.getElementById('empName').value;
-            const phone = document.getElementById('empPhone').value;
-            const nationalId = document.getElementById('empNationalId').value;
+            const name = document.getElementById('empName').value.trim();
+            const phone = document.getElementById('empPhone').value.trim();
+            const nationalId = document.getElementById('empNationalId').value.trim();
             
-            if(!name || !phone || !nationalId) { alert('أدخل كافة البيانات المطلوبة'); return; }
+            if(!name || !phone || !nationalId) { alert('أدخل كافة البيانات'); return; }
 
-            const empId = 'EMP-' + Math.floor(1000 + Math.random() * 9000);
-            set(ref(database, `companiesData/${currentCompany}/employees/${empId}`), {
-                name, phone, nationalId, empId, role: 'employee', status: 'active'
-            }).then(() => {
-                alert('تم إضافة الموظف بنجاح برقم HR ID: ' + empId);
-                document.getElementById('empName').value = '';
-                document.getElementById('empPhone').value = '';
-                document.getElementById('empNationalId').value = '';
+            // توليد HR ID يبدأ من 1000 تصاعدياً
+            get(ref(database, `companiesData/${currentCompany}/employees`)).then((snapshot) => {
+                let nextId = 1000;
+                if(snapshot.exists()) {
+                    const ids = Object.keys(snapshot.val()).map(Number).filter(n => !isNaN(n));
+                    if(ids.length > 0) nextId = Math.max(...ids) + 1;
+                }
+
+                set(ref(database, `companiesData/${currentCompany}/employees/${nextId}`), {
+                    name, phone, nationalId, empId: nextId.toString(), role: 'employee', status: 'active'
+                }).then(() => {
+                    alert('تم تسجيل الموظف برقم HR ID: ' + nextId);
+                    document.getElementById('empName').value = '';
+                    document.getElementById('empPhone').value = '';
+                    document.getElementById('empNationalId').value = '';
+                });
             });
         }
 
-        // جلب الموظفين
+        // جلب وعرض الموظفين مع البحث
         onValue(ref(database, `companiesData/${currentCompany}/employees`), (snapshot) => {
-            const tbody = document.getElementById('employeesTable');
-            tbody.innerHTML = '';
             if(snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    const emp = child.val();
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-700/50">
-                            <td class="p-3 font-bold">${emp.name}</td>
-                            <td class="p-3">${emp.phone}</td>
-                            <td class="p-3">${emp.nationalId}</td>
-                            <td class="p-3">
-                                <select onchange="updateRole('${emp.empId}', this.value)" class="bg-slate-900 border border-slate-700 p-1 rounded text-xs">
-                                    <option value="employee" ${emp.role==='employee'?'selected':''}>موظف عادي</option>
-                                    <option value="admin" ${emp.role==='admin'?'selected':''}>مشرف / أدمن فرعي</option>
-                                </select>
-                            </td>
-                            <td class="p-3">
-                                <button onclick="toggleBlock('${emp.empId}', '${emp.status}')" class="px-2 py-1 rounded text-xs ${emp.status==='active'?'bg-red-600':'bg-emerald-600'}">
-                                    ${emp.status==='active'?'حظر':'إلغاء الحظر'}
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
+                allEmployeesData = snapshot.val();
+                renderEmployees(allEmployeesData);
+            } else {
+                document.getElementById('employeesTable').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد موظفين مسجلين</td></tr>';
             }
         });
+
+        function renderEmployees(data) {
+            const tbody = document.getElementById('employeesTable');
+            tbody.innerHTML = '';
+            Object.values(data).forEach(emp => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-700/50">
+                        <td class="p-3 font-mono text-blue-400 font-bold">${emp.empId}</td>
+                        <td class="p-3 font-bold">${emp.name}</td>
+                        <td class="p-3">${emp.phone}</td>
+                        <td class="p-3">${emp.nationalId}</td>
+                        <td class="p-3">
+                            <select onchange="updateRole('${emp.empId}', this.value)" class="bg-slate-900 border border-slate-700 p-1 rounded text-xs">
+                                <option value="employee" ${emp.role==='employee'?'selected':''}>موظف عادي</option>
+                                <option value="admin" ${emp.role==='admin'?'selected':''}>مشرف / أدمن فرعي</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="toggleBlock('${emp.empId}', '${emp.status}')" class="px-2 py-1 rounded text-xs ${emp.status==='active'?'bg-red-600':'bg-emerald-600'}">
+                                ${emp.status==='active'?'حظر':'تفعيل'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.filterEmployees = function() {
+            const query = document.getElementById('searchQuery').value.toLowerCase();
+            const filtered = {};
+            Object.values(allEmployeesData).forEach(emp => {
+                if(emp.name.toLowerCase().includes(query) || emp.empId.includes(query) || emp.phone.includes(query) || emp.nationalId.includes(query)) {
+                    filtered[emp.empId] = emp;
+                }
+            });
+            renderEmployees(filtered);
+        }
 
         window.updateRole = function(empId, role) {
             update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role });
@@ -136,6 +191,28 @@
         window.toggleBlock = function(empId, status) {
             update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { status: status === 'active' ? 'blocked' : 'active' });
         }
+
+        // جلب سجلات الحضور والبصمة بالصور
+        onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
+            const tbody = document.getElementById('attendanceLogsTable');
+            tbody.innerHTML = '';
+            if(snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const log = child.val();
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-700/50">
+                            <td class="p-3"><img src="${log.faceImage || ''}" class="w-12 h-12 rounded-full object-cover border border-blue-500" alt="صورة البصمة"></td>
+                            <td class="p-3 font-bold">${log.name}</td>
+                            <td class="p-3 font-mono text-blue-400">${log.empId}</td>
+                            <td class="p-3">${log.time}</td>
+                            <td class="p-3"><span class="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">حضور مؤكد</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد سجلات حضور حتى الآن</td></tr>';
+            }
+        });
     </script>
 </body>
 </html>
