@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - Super Admin</title>
+    <title>DARWIN HR - Super Admin Control</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
@@ -12,14 +12,14 @@
     <div class="max-w-6xl mx-auto">
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
             <div>
-                <h1 class="text-3xl font-bold text-red-500">DARWIN HR - لوحة التحكم العليا (Super Admin)</h1>
-                <p class="text-slate-400 text-sm">التحكم في تراخيص واشتراكات المكاتب والشركات</p>
+                <h1 class="text-3xl font-bold text-red-500">DARWIN HR - لوحة السوبر أدمن العليا</h1>
+                <p class="text-slate-400 text-sm">التحكم المطلق في كل الشركات، الاشتراكات، وموظفي العملاء</p>
             </div>
             <a href="index.html" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold">خروج</a>
         </header>
 
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl mb-8 shadow-xl">
-            <h2 class="text-xl font-bold mb-4 text-blue-400">إضافة شركة جديدة وتوليد كود اشتراك شهري</h2>
+            <h2 class="text-xl font-bold mb-4 text-blue-400">إضافة شركة جديدة وتوليد كود اشتراك</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input type="text" id="compName" placeholder="اسم الشركة أو المكتب" class="bg-slate-800 border border-slate-700 p-3 rounded-lg focus:outline-none">
                 <input type="text" id="compPhone" placeholder="رقم هاتف مسؤول الشركة" class="bg-slate-800 border border-slate-700 p-3 rounded-lg focus:outline-none">
@@ -28,7 +28,7 @@
         </div>
 
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-            <h2 class="text-xl font-bold mb-4">الشركات المشتركة</h2>
+            <h2 class="text-xl font-bold mb-4">الشركات المشتركة والتحكم بها</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right">
                     <thead>
@@ -36,8 +36,8 @@
                             <th class="p-3">اسم الشركة</th>
                             <th class="p-3">الكود</th>
                             <th class="p-3">الهاتف</th>
-                            <th class="p-3">الحالة</th>
-                            <th class="p-3">تحكم الاشتراك</th>
+                            <th class="p-3">حالة الاشتراك</th>
+                            <th class="p-3">إجراءات السوبر أدمن</th>
                         </tr>
                     </thead>
                     <tbody id="companiesList"></tbody>
@@ -49,11 +49,10 @@
     <script type="module">
         import { database, ref, set, onValue, update } from "./firebase-config.js";
 
-        // التحقق من الباسورد السري الخاص بك
         window.onload = function() {
-            let pass = prompt("أدخل كلمة المرور الخاصة بك (Super Admin):");
+            let pass = prompt("أدخل كلمة المرور الخاصة بـ Super Admin:");
             if(pass !== "darwin2026") {
-                alert("كلمة المرور خاطئة!");
+                alert("كلمة المرور غير صحيحة!");
                 window.location.href = "index.html";
             }
             loadCompanies();
@@ -86,10 +85,11 @@
                             <td class="p-3 text-blue-400 font-mono">${c.code}</td>
                             <td class="p-3">${c.phone}</td>
                             <td class="p-3"><span class="px-2 py-1 rounded text-xs ${c.status==='active'?'bg-green-900 text-green-300':'bg-red-900 text-red-300'}">${c.status==='active'?'نشط':'موقوف'}</span></td>
-                            <td class="p-3">
+                            <td class="p-3 flex gap-2">
                                 <button onclick="toggleStatus('${c.code}', '${c.status}')" class="px-3 py-1 rounded text-xs font-bold ${c.status==='active'?'bg-red-600':'bg-green-600'}">
                                     ${c.status==='active'?'إيقاف الاشتراك':'تفعيل'}
                                 </button>
+                                <button onclick="loginAsCompany('${c.code}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs font-bold">دخول لإدارة الشركة</button>
                             </td>
                         </tr>
                     `;
@@ -99,6 +99,11 @@
 
         window.toggleStatus = function(code, current) {
             update(ref(database, 'companies/' + code), { status: current === 'active' ? 'suspended' : 'active' });
+        }
+
+        window.loginAsCompany = function(code) {
+            localStorage.setItem('darwin_current_company', code);
+            window.location.href = 'company-admin.html';
         }
     </script>
 </body>
