@@ -21,9 +21,7 @@
             </div>
         </header>
 
-        <!-- الإعدادات والبحث -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- النطاق الجغرافي -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
                 <h2 class="text-lg font-bold mb-4 text-blue-300">📍 نطاق الخريطة (Geofencing)</h2>
                 <div class="space-y-3">
@@ -33,28 +31,25 @@
                 </div>
             </div>
 
-            <!-- إضافة موظف -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
                 <h2 class="text-lg font-bold mb-4 text-blue-300">👤 إضافة موظف جديد (HR ID يبدأ من 1000)</h2>
                 <div class="space-y-3">
                     <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <input type="text" id="empPhone" placeholder="رقم الهاتف (SMS Code)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
+                    <input type="text" id="empPhone" placeholder="رقم الهاتف" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <input type="text" id="empNationalId" placeholder="رقم البطاقة (14 رقم)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                     <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-lg text-sm">تسجيل الموظف</button>
                 </div>
             </div>
 
-            <!-- البحث عن موظف -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
                 <h2 class="text-lg font-bold mb-4 text-blue-300">🔍 بحث متقدم عن موظف</h2>
                 <div class="space-y-3">
                     <input type="text" id="searchQuery" oninput="filterEmployees()" placeholder="ابحث بالاسم، الكود، الهاتف، أو البطاقة..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
-                    <p class="text-xs text-slate-400">النتائج تظهر فوراً في جدول الموظفين أدناه.</p>
+                    <p class="text-xs text-slate-400">النتائج تظهر فوراً في الجدول أدناه.</p>
                 </div>
             </div>
         </div>
 
-        <!-- جدول الموظفين -->
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl mb-8">
             <h2 class="text-xl font-bold mb-4">قائمة العمال والموظفين</h2>
             <div class="overflow-x-auto">
@@ -74,7 +69,6 @@
             </div>
         </div>
 
-        <!-- سجلات الحضور وصور بصمة الوجه -->
         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
             <h2 class="text-xl font-bold mb-4">📸 سجلات الحضور اليومية وصور بصمة الوجه</h2>
             <div class="overflow-x-auto">
@@ -100,7 +94,6 @@
         if(!currentCompany) window.location.href = 'index.html';
 
         document.getElementById('companyTitleName').innerText = "لوحة تحكم الشركة: " + currentCompany;
-
         let allEmployeesData = {};
 
         window.saveLocation = function() {
@@ -118,7 +111,6 @@
             
             if(!name || !phone || !nationalId) { alert('أدخل كافة البيانات'); return; }
 
-            // توليد HR ID يبدأ من 1000 تصاعدياً
             get(ref(database, `companiesData/${currentCompany}/employees`)).then((snapshot) => {
                 let nextId = 1000;
                 if(snapshot.exists()) {
@@ -137,7 +129,6 @@
             });
         }
 
-        // جلب وعرض الموظفين مع البحث
         onValue(ref(database, `companiesData/${currentCompany}/employees`), (snapshot) => {
             if(snapshot.exists()) {
                 allEmployeesData = snapshot.val();
@@ -192,7 +183,6 @@
             update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { status: status === 'active' ? 'blocked' : 'active' });
         }
 
-        // جلب سجلات الحضور والبصمة بالصور
         onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
             const tbody = document.getElementById('attendanceLogsTable');
             tbody.innerHTML = '';
