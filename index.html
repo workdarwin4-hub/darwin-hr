@@ -37,7 +37,6 @@
                     const comp = snapshot.val();
                     if(comp.status === 'active') {
                         localStorage.setItem('darwin_current_company', code);
-                        // تحديد واجهة الدخول (هل هو مدير الشركة أم موظف؟)
                         window.location.href = 'company-admin.html';
                     } else {
                         alert('عذراً، اشتراك هذه الشركة موقوف حالياً من الإدارة.');
