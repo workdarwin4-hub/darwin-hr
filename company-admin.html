@@ -49,6 +49,7 @@
                     <select id="empRole" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-sm">
                         <option value="employee">موظف عادي</option>
                         <option value="supervisor">مشرف</option>
+                        <option value="admin">أدمن الشركة</option>
                     </select>
                     <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-lg text-sm">تسجيل الموظف</button>
                 </div>
@@ -201,6 +202,7 @@
                                 <select onchange="updateRole('${emp.empId}', this.value)" class="bg-slate-900 border border-slate-700 p-2 rounded text-xs text-white">
                                     <option value="employee" ${emp.role === 'employee' ? 'selected' : ''}>موظف عادي (Employee)</option>
                                     <option value="supervisor" ${emp.role === 'supervisor' ? 'selected' : ''}>مشرف (Supervisor)</option>
+                                    <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>أدمن الشركة (Admin)</option>
                                 </select>
                             </td>
                             <td class="p-3">
