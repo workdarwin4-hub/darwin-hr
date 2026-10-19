@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - لوحة تحكم الأدمن التجارية</title>
+    <title>DARWIN HR - لوحة تحكم الأدمن</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
@@ -14,7 +14,7 @@
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-blue-400" id="companyHeaderName">DARWIN HR - الإدارة العليا</h1>
-                <p class="text-slate-400 text-sm mt-1">التحكم المطلق في الفروع، الموظفين، الأرصدة، البصمات، والرواتب</p>
+                <p class="text-slate-400 text-sm mt-1">التحكم المطلق، إعدادات الأمان، وتعطيل/تشغيل التطبيقات</p>
             </div>
             <div class="flex gap-3">
                 <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-bold shadow-lg">تطبيق الموظفين</a>
@@ -22,8 +22,27 @@
             </div>
         </header>
 
+        <!-- لوحة الأمان وتغيير الباسورد وتعطيل السيستم -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- الفروع ومواقع العمل (GPS) -->
+            <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold text-amber-400">🔐 إعدادات أمان السوبر أدمن</h2>
+                <input type="password" id="newAdminPass" placeholder="كلمة المرور الجديدة للأدمن" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                <button onclick="updateAdminPassword()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2.5 rounded-xl text-sm">تغيير ومسح الباسورد القديم نهائياً</button>
+                <p class="text-[10px] text-slate-500">ملاحظة: مفتاح الطوارئ الاحتياطي للنسخة هو: <span class="font-mono text-slate-300">darwin_master_2026</span></p>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold text-red-400">⚡ حالة النظام (تشغيل أو تعطيل التطبيق)</h2>
+                <p class="text-xs text-slate-400">يمكنك تعطيل السيستم بالكامل أو إعادة تشغيله في أي وقت:</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="toggleSystemStatus(true)" class="bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-xl text-xs">🟢 تشغيل السيستم</button>
+                    <button onclick="toggleSystemStatus(false)" class="bg-red-600 hover:bg-red-700 font-bold py-3 rounded-xl text-xs">🔴 تعطيل السيستم صيانة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- الفروع والموظفين -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <h2 class="text-lg font-bold text-blue-400">🏢 إعداد الفروع ومواقع العمل (GPS)</h2>
                 <input type="text" id="branchName" placeholder="اسم الفرع أو المقر" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
@@ -31,37 +50,34 @@
                     <input type="text" id="branchLat" placeholder="خط العرض (Lat)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                     <input type="text" id="branchLng" placeholder="خط الطول (Lng)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 </div>
-                <button onclick="fetchCurrentLocation()" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2 rounded-xl text-xs">📍 جلب موقعي الحالي كموقع عمل</button>
-                <button onclick="addBranch()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-xl text-sm">حفظ الفرع الجديد</button>
+                <button onclick="fetchCurrentLocation()" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2 rounded-xl text-xs">📍 جلب موقعي الحالي</button>
+                <button onclick="addBranch()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-xl text-sm">حفظ الفرع</button>
             </div>
 
-            <!-- تسجيل موظف جديد -->
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-                <h2 class="text-lg font-bold text-blue-400">👤 تسجيل موظف وتحديد صلاحياته</h2>
+                <h2 class="text-lg font-bold text-blue-400">👤 تسجيل موظف جديد</h2>
                 <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 <input type="text" id="empPhone" placeholder="رقم الهاتف" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="empNationalId" placeholder="الرقم القومي (14 رقم)" maxlength="14" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
-                    <input type="text" id="empManagerId" placeholder="كود المدير المباشر (HR ID)" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                    <input type="text" id="empNationalId" placeholder="الرقم القومي (14 رقم)" maxlength="14" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                    <input type="text" id="empManagerId" placeholder="اسم المدير المباشر" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 </div>
-                <select id="empBranchSelect" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm"><option value="">اختر الفرع / موقع العمل</option></select>
-                <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-xl text-sm">حفظ وتسجيل الموظف</button>
+                <select id="empBranchSelect" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm"><option value="">اختر الفرع</option></select>
+                <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-xl text-sm">حفظ الموظف</button>
             </div>
         </div>
 
-        <!-- جدول التحكم في الموظفين والأرصدة -->
         <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-amber-400">⚡ التحكم الشامل في الموظفين (أرصدة، رواتب، وصلاحيات)</h2>
+            <h2 class="text-xl font-bold text-amber-400">⚡ قائمة الموظفين وسجلات البصمات المنفصلة</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
                         <tr class="border-b border-slate-800 text-slate-400">
-                            <th class="p-3">HR ID</th>
-                            <th class="p-3">البيانات الأساسية</th>
+                            <th class="p-3">صورة البروفايل</th>
+                            <th class="p-3">HR ID والاسم</th>
                             <th class="p-3">القومي والمدير</th>
-                            <th class="p-3">أرصدة الإجازات</th>
                             <th class="p-3">الراتب الصافي</th>
-                            <th class="p-3">الإجراءات والصلاحيات</th>
+                            <th class="p-3">الإجراءات والسجلات</th>
                         </tr>
                     </thead>
                     <tbody id="employeesControlTable"></tbody>
@@ -69,42 +85,16 @@
             </div>
         </div>
 
-        <!-- طلبات الموظفين -->
-        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-amber-400">📬 طلبات الإجازات والأذونات المقدمة</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead>
-                        <tr class="border-b border-slate-800 text-slate-400">
-                            <th class="p-3">الموظف</th>
-                            <th class="p-3">نوع الطلب</th>
-                            <th class="p-3">التفاصيل</th>
-                            <th class="p-3">الحالة</th>
-                            <th class="p-3">القرار</th>
-                        </tr>
-                    </thead>
-                    <tbody id="requestsTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- سجل البصمات وتعديل الوقت -->
-        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-amber-400">📸 سجل البصمات (مع إمكانية تعديل وقت البصمة)</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead>
-                        <tr class="border-b border-slate-800 text-slate-400">
-                            <th class="p-3">الموظف</th>
-                            <th class="p-3">البصمة</th>
-                            <th class="p-3">الوقت والتاريخ</th>
-                            <th class="p-3">تعديل وقت البصمة</th>
-                            <th class="p-3">صورة الكاميرا</th>
-                            <th class="p-3">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceLogsTable"></tbody>
-                </table>
+        <!-- نافذة سجلات الموظف المنفصلة -->
+        <div id="empLogsModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-3xl max-h-[80vh] overflow-y-auto space-y-4 text-right shadow-2xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 id="modalEmpTitle" class="text-lg font-bold text-blue-400">سجل بصمات الموظف</h3>
+                    <button onclick="closeEmpLogsModal()" class="text-slate-400 font-bold hover:text-white">✕ إغلاق</button>
+                </div>
+                <div id="modalEmpLogsContainer" class="space-y-3">
+                    <p class="text-slate-500 text-xs">جاري التحميل...</p>
+                </div>
             </div>
         </div>
 
@@ -117,6 +107,19 @@
         get(ref(database, `companies/${currentCompany}`)).then(snap => {
             if(snap.exists()) document.getElementById('companyHeaderName').innerText = "شركة: " + snap.val().name;
         });
+
+        window.updateAdminPassword = function() {
+            const newPass = document.getElementById('newAdminPass').value.trim();
+            if(!newPass) { alert('أدخل كلمة المرور الجديدة'); return; }
+            update(ref(database, `companies/${currentCompany}`), {
+                customPassword: newPass
+            }).then(() => alert('تم تغيير باسورد السوبر أدمن وحذف القديم نهائياً!'));
+        }
+
+        window.toggleSystemStatus = function(status) {
+            set(ref(database, 'systemSettings/isSystemActive'), status)
+            .then(() => alert(status ? 'تم تفعيل السيستم بنجاح!' : 'تم تعطيل السيستم للصيانة بنجاح!'));
+        }
 
         window.fetchCurrentLocation = function() {
             if(!navigator.geolocation) { alert('المتصفح لا يدعم تحديد الموقع'); return; }
@@ -138,7 +141,7 @@
 
         onValue(ref(database, `companiesData/${currentCompany}/branches`), (snapshot) => {
             const select = document.getElementById('empBranchSelect');
-            select.innerHTML = '<option value="">اختر الفرع / موقع العمل</option>';
+            select.innerHTML = '<option value="">اختر الفرع</option>';
             if(snapshot.exists()) {
                 snapshot.forEach(child => {
                     const b = child.val();
@@ -165,8 +168,8 @@
 
                 set(ref(database, `companiesData/${currentCompany}/employees/${nextId}`), {
                     name, phone, nationalId, managerId: managerId || '', branchId, empId: nextId.toString(),
-                    role: 'employee', status: 'active', annualLeave: 2, emergencyLeave: 2, finalNetPay: 0
-                }).then(() => { alert('تم تسجيل الموظف بنجاح برقم HR ID: ' + nextId); });
+                    role: 'employee', status: 'active', annualLeave: 2, emergencyLeave: 2, finalNetPay: 0, profileImg: 'https://via.placeholder.com/60'
+                }).then(() => { alert('تم تسجيل الموظف برقم HR ID: ' + nextId); });
             });
         }
 
@@ -178,20 +181,15 @@
                 Object.values(emps).forEach(emp => {
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-800/60">
-                            <td class="p-3 font-mono text-blue-400 font-bold">${emp.empId}</td>
-                            <td class="p-3 font-bold">${emp.name}<br><span class="text-xs text-slate-400">${emp.phone}</span></td>
+                            <td class="p-3"><img src="${emp.profileImg || 'https://via.placeholder.com/60'}" class="w-12 h-12 rounded-full object-cover border border-slate-700"></td>
+                            <td class="p-3 font-bold"><span class="text-blue-400 font-mono">[${emp.empId}]</span> ${emp.name}<br><span class="text-xs text-slate-400">${emp.phone}</span></td>
                             <td class="p-3 text-xs">القومي: <span class="font-mono text-amber-300">${emp.nationalId || '---'}</span><br>المدير: <span class="font-mono text-purple-300">${emp.managerId || '---'}</span></td>
                             <td class="p-3 text-xs">
-                                سنوية: <input type="number" id="annual_${emp.empId}" value="${emp.annualLeave ?? 2}" class="w-12 bg-slate-950 border border-slate-800 text-center rounded"><br>
-                                طارئة: <input type="number" id="emer_${emp.empId}" value="${emp.emergencyLeave ?? 2}" class="w-12 bg-slate-950 border border-slate-800 text-center rounded mt-1">
-                                <button onclick="updateLeaves('${emp.empId}')" class="text-[10px] bg-blue-600 px-1.5 py-0.5 rounded mt-1">حفظ</button>
-                            </td>
-                            <td class="p-3">
-                                <input type="number" id="pay_${emp.empId}" value="${emp.finalNetPay || 0}" class="w-20 bg-slate-950 border border-slate-800 p-1 rounded text-xs">
-                                <button onclick="updatePay('${emp.empId}')" class="bg-emerald-600 hover:bg-emerald-700 px-2 py-1 rounded text-xs mt-1 block">اعتماد</button>
+                                الراتب: <input type="number" id="pay_${emp.empId}" value="${emp.finalNetPay || 0}" class="w-20 bg-slate-950 border border-slate-800 p-1 rounded text-xs">
+                                <button onclick="updatePay('${emp.empId}')" class="bg-emerald-600 px-2 py-1 rounded text-[10px] mt-1 block">اعتماد</button>
                             </td>
                             <td class="p-3 space-y-1">
-                                <button onclick="toggleRole('${emp.empId}', '${emp.role}')" class="px-2 py-1 rounded text-xs font-bold block w-full ${emp.role==='supervisor'?'bg-amber-600':'bg-purple-600'}">${emp.role==='supervisor'?'إلغاء إشراف':'ترقية مشرف'}</button>
+                                <button onclick="openEmpLogs('${emp.empId}', '${emp.name}')" class="bg-indigo-600 hover:bg-indigo-700 px-2 py-1 rounded text-xs font-bold block w-full">📂 سجل البصمات</button>
                                 <button onclick="deleteEmployee('${emp.empId}')" class="px-2 py-1 rounded text-xs font-bold bg-red-600 hover:bg-red-700 block w-full">حذف</button>
                             </td>
                         </tr>
@@ -200,103 +198,58 @@
             }
         });
 
-        window.updateLeaves = function(empId) {
-            const annual = Number(document.getElementById(`annual_${empId}`).value);
-            const emergency = Number(document.getElementById(`emer_${empId}`).value);
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { annualLeave: annual, emergencyLeave: emergency })
-            .then(() => alert('تم تحديث أرصدة الإجازات!'));
+        window.openEmpLogs = function(empId, empName) {
+            document.getElementById('modalEmpTitle').innerText = `سجل بصمات الموظف: ${empName} (HR ID: ${empId})`;
+            document.getElementById('empLogsModal').classList.remove('hidden');
+
+            onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
+                const container = document.getElementById('modalEmpLogsContainer');
+                container.innerHTML = '';
+                let found = false;
+
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const log = child.val();
+                        const key = child.key;
+                        if(log.empId === empId) {
+                            found = true;
+                            container.innerHTML += `
+                                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-3">
+                                        ${log.faceImage ? `<img src="${log.faceImage}" class="w-12 h-12 object-cover rounded-xl border border-slate-700">` : ''}
+                                        <div>
+                                            <p class="font-bold text-blue-400">الحالة: ${log.type}</p>
+                                            <p class="text-slate-300 mt-1">الوقت: <input type="text" id="time_${key}" value="${log.time}" class="bg-slate-900 border border-slate-800 p-1 rounded text-xs w-40"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <button onclick="updateAttendanceTime('${key}')" class="bg-indigo-600 px-3 py-1 rounded font-bold">تعديل الوقت</button>
+                                        <button onclick="deleteAttendance('${key}')" class="bg-red-600 px-3 py-1 rounded font-bold">حذف</button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                if(!found) container.innerHTML = '<p class="text-center text-xs text-slate-500 py-6">لا توجد سجلات.</p>';
+            });
         }
 
-        window.updatePay = function(empId) {
-            const pay = Number(document.getElementById(`pay_${empId}`).value);
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { finalNetPay: pay })
-            .then(() => alert('تم اعتماد الراتب!'));
-        }
-
-        window.toggleRole = function(empId, currentRole) {
-            const newRole = currentRole === 'supervisor' ? 'employee' : 'supervisor';
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role: newRole })
-            .then(() => alert('تم تغيير الصلاحية!'));
-        }
-
-        window.deleteEmployee = function(empId) {
-            if(confirm('هل أنت متأكد من حذف هذا الموظف؟')) {
-                remove(ref(database, `companiesData/${currentCompany}/employees/${empId}`))
-                .then(() => alert('تم الحذف بنجاح!'));
-            }
-        }
-
-        onValue(ref(database, `companiesData/${currentCompany}/requests`), (snapshot) => {
-            const tbody = document.getElementById('requestsTable');
-            tbody.innerHTML = '';
-            if(snapshot.exists()) {
-                snapshot.forEach(child => {
-                    const req = child.val();
-                    const key = child.key;
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/60">
-                            <td class="p-3 font-bold">${req.empName} (${req.empId})</td>
-                            <td class="p-3 text-blue-300">${req.type}</td>
-                            <td class="p-3 text-xs">${req.details}</td>
-                            <td class="p-3"><span class="px-2 py-1 rounded text-xs ${req.status==='مقبول'?'bg-emerald-900 text-emerald-300':req.status==='مرفوض'?'bg-red-900 text-red-300':'bg-amber-900 text-amber-300'}">${req.status || 'قيد المراجعة'}</span></td>
-                            <td class="p-3 flex gap-2">
-                                <button onclick="updateReq('${key}', 'مقبول')" class="px-2 py-1 bg-emerald-600 rounded text-xs font-bold">قبول</button>
-                                <button onclick="updateReq('${key}', 'مرفوض')" class="px-2 py-1 bg-red-600 rounded text-xs font-bold">رفض</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات.</td></tr>';
-            }
-        });
-
-        window.updateReq = function(key, status) {
-            update(ref(database, `companiesData/${currentCompany}/requests/${key}`), { status }).then(() => alert('تم التحديث'));
-        }
-
-        onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
-            const tbody = document.getElementById('attendanceLogsTable');
-            tbody.innerHTML = '';
-            if(snapshot.exists()) {
-                snapshot.forEach(child => {
-                    const log = child.val();
-                    const key = child.key;
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/60">
-                            <td class="p-3 font-bold">${log.name} (${log.empId})</td>
-                            <td class="p-3 text-blue-400 font-bold">${log.type}</td>
-                            <td class="p-3 text-xs">${log.time}</td>
-                            <td class="p-3 space-x-1 space-x-reverse">
-                                <input type="text" id="time_${key}" value="${log.time}" class="bg-slate-950 border border-slate-800 p-1 rounded text-xs w-36">
-                                <button onclick="updateAttendanceTime('${key}')" class="bg-indigo-600 hover:bg-indigo-700 px-2 py-1 rounded text-xs font-bold">تعديل</button>
-                            </td>
-                            <td class="p-3">
-                                ${log.faceImage && log.faceImage.startsWith('data:image') ? `<img src="${log.faceImage}" class="w-12 h-12 object-cover rounded-xl border border-slate-700">` : '<span class="text-xs text-slate-500">بدون</span>'}
-                            </td>
-                            <td class="p-3">
-                                <button onclick="deleteAttendance('${key}')" class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs font-bold">حذف</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد سجلات.</td></tr>';
-            }
-        });
-
+        window.closeEmpLogsModal = function() { document.getElementById('empLogsModal').classList.add('hidden'); }
         window.updateAttendanceTime = function(key) {
             const newTime = document.getElementById(`time_${key}`).value.trim();
             if(!newTime) return;
-            update(ref(database, `companiesData/${currentCompany}/attendance/${key}`), { time: newTime })
-            .then(() => alert('تم تعديل وقت البصمة!'));
+            update(ref(database, `companiesData/${currentCompany}/attendance/${key}`), { time: newTime }).then(() => alert('تم التعديل!'));
         }
-
         window.deleteAttendance = function(key) {
-            if(confirm('حذف هذه البصمة؟')) {
-                remove(ref(database, `companiesData/${currentCompany}/attendance/${key}`))
-                .then(() => alert('تم الحذف'));
-            }
+            if(confirm('حذف البصمة؟')) remove(ref(database, `companiesData/${currentCompany}/attendance/${key}`)).then(() => alert('تم الحذف'));
+        }
+        window.updatePay = function(empId) {
+            const pay = Number(document.getElementById(`pay_${empId}`).value);
+            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { finalNetPay: pay }).then(() => alert('تم اعتماد الراتب!'));
+        }
+        window.deleteEmployee = function(empId) {
+            if(confirm('حذف الموظف؟')) remove(ref(database, `companiesData/${currentCompany}/employees/${empId}`)).then(() => alert('تم الحذف!'));
         }
     </script>
 </body>
