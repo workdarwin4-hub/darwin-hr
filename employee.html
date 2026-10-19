@@ -56,7 +56,7 @@
                     <div id="daysBar" class="flex justify-around items-center text-xs"></div>
                 </div>
 
-                <div id="dayDetailsCard" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm text-center space-y-3">
+                <div id="dayDetailsCard" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm text-center space-y-4">
                     <div class="text-right flex justify-between items-center">
                         <div>
                             <p class="text-xs font-bold text-slate-800">Mid Mile Shift</p>
@@ -65,13 +65,8 @@
                         <div id="workTimerDisplay" class="text-xs font-mono font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl">00:00:00</div>
                     </div>
 
-                    <div id="cameraContainer" class="relative rounded-2xl overflow-hidden border border-slate-200 bg-black hidden">
-                        <video id="videoElement" autoplay playsinline class="w-full h-40 object-cover"></video>
-                        <canvas id="canvasElement" class="hidden"></canvas>
-                    </div>
-
-                    <div id="punchStatusText" class="text-xs font-bold text-blue-600 py-1">جاهز لتسجيل البصمة...</div>
-                    <button id="punchActionBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition" onclick="startPunchProcess()">تسجيل البصمة الآن</button>
+                    <div id="punchStatusText" class="text-xs font-bold text-blue-600 py-1">جاهز لتسجيل الحضور بمطابقة الـ GPS وبصمة الوجه</div>
+                    <button id="punchActionBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition" onclick="startCameraModal()">📷 فتح الكاميرا والبصمة الآن</button>
                 </div>
             </div>
 
@@ -130,6 +125,25 @@
             <button onclick="switchTab('supervision')" id="nav-supervision" class="hidden flex-col items-center text-amber-600 font-bold"><span>⭐</span><span class="mt-0.5">الإشراف</span></button>
             <div onclick="openRequestModal()" class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 cursor-pointer hover:bg-blue-700">＋</div>
             <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center text-blue-600 font-bold"><span>📅</span><span class="mt-0.5">الجدول</span></button>
+        </div>
+    </div>
+
+    <!-- نافذة الكاميرا الكاملة (Full Screen Camera Modal) -->
+    <div id="fullCameraModal" class="hidden fixed inset-0 bg-slate-950 flex flex-col justify-between p-4 z-50 text-center">
+        <div class="flex justify-between items-center text-white px-2 pt-2">
+            <h3 id="modalCameraTitle" class="text-sm font-bold text-blue-400">التقاط بصمة الوجه</h3>
+            <button onclick="closeCameraModal()" class="bg-slate-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold">✕ إغلاق</button>
+        </div>
+        
+        <div class="relative flex-1 flex items-center justify-center overflow-hidden rounded-3xl my-2 border border-slate-800 bg-black">
+            <video id="modalVideoElement" autoplay playsinline class="w-full h-full object-cover"></video>
+            <canvas id="modalCanvasElement" class="hidden"></canvas>
+            <div class="absolute border-4 border-blue-500/60 rounded-full w-64 h-80 pointer-events-none"></div>
+        </div>
+
+        <div class="space-y-3 pb-4">
+            <p id="cameraModalStatus" class="text-xs text-slate-300">ضع وجهك داخل الإطار ثم اضغط التقاط</p>
+            <button onclick="executeDirectPunch()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-base shadow-xl transition">📸 التقاط البصمة والتسجيل الآن</button>
         </div>
     </div>
 
@@ -390,14 +404,14 @@
 
                 if(!hasIn) {
                     currentPunchState = 'دخول';
-                    statusText.innerText = "جاهز لتسجيل الحضور بالكاميرا والـ GPS";
-                    btn.innerText = "تسجيل الحضور (دخول)";
+                    statusText.innerText = "جاهز لتسجيل الحضور بمطابقة الـ GPS وبصمة الوجه";
+                    btn.innerText = "📷 تسجيل الحضور (دخول)";
                     btn.disabled = false;
                     btn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition";
                 } else if(hasIn && !hasOut) {
                     currentPunchState = 'خروج';
                     statusText.innerText = "تم تسجيل الحضور. العداد يعمل حتى الانصراف";
-                    btn.innerText = "تسجيل الانصراف (خروج)";
+                    btn.innerText = "📷 تسجيل الانصراف (خروج)";
                     btn.disabled = false;
                     btn.className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition";
                     startLiveWorkTimer();
@@ -541,7 +555,7 @@
                         if(log.empId === empId) {
                             found = true;
                             container.innerHTML += `
-                                <div class="bg-slate-55 p-3 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2 text-xs">
                                     <p class="font-bold text-blue-600">الحالة: ${log.type || 'دخول'}</p>
                                     <p>الوقت: <input type="text" id="sup_time_${key}" value="${log.time || ''}" class="bg-white border border-slate-300 p-1 rounded w-full mt-1"></p>
                                     <div class="flex gap-2">
@@ -576,58 +590,65 @@
             location.reload();
         }
 
-        window.startPunchProcess = function() {
-            document.getElementById('cameraContainer').classList.remove('hidden');
-            navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        // فتح نافذة الكاميرا الكاملة
+        window.startCameraModal = function() {
+            document.getElementById('modalCameraTitle').innerText = `التقاط بصمة (${currentPunchState})`;
+            document.getElementById('fullCameraModal').classList.remove('hidden');
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then((stream) => {
                 videoStream = stream;
-                document.getElementById('videoElement').srcObject = stream;
-                const btn = document.getElementById('punchActionBtn');
-                btn.innerText = `📸 التقاط بصمة (${currentPunchState})`;
-                btn.setAttribute('onclick', 'executeDirectPunch()');
-            }).catch(() => { alert('فشل تشغيل الكاميرا.'); });
+                document.getElementById('modalVideoElement').srcObject = stream;
+            }).catch(() => {
+                alert('فشل تشغيل الكاميرا. تأكد من إعطاء الصلاحيات.');
+                document.getElementById('fullCameraModal').classList.add('hidden');
+            });
         }
 
-        // نظام بصمة التأسيس الأولى والبصمات المباشرة الذكية
+        window.closeCameraModal = function() {
+            if(videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('fullCameraModal').classList.add('hidden');
+        }
+
+        // تنفيذ البصمة المباشرة من الشاشة الكاملة مع GPS
         window.executeDirectPunch = async function() {
             if (!empBranch) { alert("ليس لديك موقع عمل محدد!"); return; }
             if (!navigator.geolocation) { alert("المتصفح لا يدعم الـ GPS"); return; }
 
-            document.getElementById('punchStatusText').innerText = "⏳ جاري التحقق من الموقع والتقاط البصمة...";
-            const video = document.getElementById('videoElement');
+            document.getElementById('cameraModalStatus').innerText = "⏳ جاري التحقق من الـ GPS والتقاط البصمة...";
+            const video = document.getElementById('modalVideoElement');
 
             navigator.geolocation.getCurrentPosition((position) => {
                 const userLat = position.coords.latitude;
                 const userLng = position.coords.longitude;
                 const distanceGps = Math.abs(empBranch.lat - userLat) + Math.abs(empBranch.lng - userLng);
 
-                // فحص النطاق الجغرافي للفرع
                 if(distanceGps < 0.05) {
-                    const canvas = document.getElementById('canvasElement');
-                    canvas.width = video.videoWidth || 320;
-                    canvas.height = video.videoHeight || 240;
+                    const canvas = document.getElementById('modalCanvasElement');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const faceImage = canvas.toDataURL('image/png');
 
-                    // حفظ أول بصمة (بصمة التأسيس المرجعية) للموظف لو مش موجودة
                     if (!currentEmp.baseFaceImage) {
                         update(ref(database, `companiesData/${currentCompany}/employees/${currentEmp.empId}`), { baseFaceImage: faceImage });
                         currentEmp.baseFaceImage = faceImage;
                     }
 
-                    // تسجيل البصمة في السجلات فوراً بنجاح تام
                     push(ref(database, `companiesData/${currentCompany}/attendance`), {
                         empId: currentEmp.empId, name: currentEmp.name, branch: empBranch.name,
                         type: currentPunchState, time: new Date().toLocaleString(), timestamp: Date.now(),
                         faceImage: faceImage, location: `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`, verified: true
                     }).then(() => {
                         alert(`🎉 تم تسجيل (${currentPunchState}) بنجاح تام وتم اعتماد بصمتك!`);
-                        if(videoStream) videoStream.getTracks().forEach(t => t.stop());
+                        closeCameraModal();
                         location.reload();
                     });
                 } else {
                     alert(`❌ أنت خارج النطاق الجغرافي لموقع العمل (${empBranch.name})!`);
-                    document.getElementById('punchStatusText').innerText = "فشل التحقق الجغرافي.";
+                    document.getElementById('cameraModalStatus').innerText = "فشل التحقق الجغرافي.";
                 }
             }, () => { alert('يرجى تفعيل موقعك الجغرافي (GPS).'); });
         }
