@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - تطبيق الموظف</title>
+    <title>DARWIN HR - تطبيق الموظف والمشرف الذكي</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -32,13 +32,16 @@
     <div id="dashboardScreen" class="hidden w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between min-h-[780px] p-4 relative">
         <div class="overflow-y-auto max-h-[690px] pb-4 space-y-4">
             
-            <!-- 1. شاشة الجدول (مع شريط الأيام المكتمل) -->
+            <!-- 1. شاشة الجدول والبصمة -->
             <div id="tabContent-schedule" class="space-y-4">
                 <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
                         <img id="profileImg" src="https://via.placeholder.com/60" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
                         <div class="text-right">
-                            <h2 id="profileName" class="font-bold text-sm text-slate-900">جاري التحميل...</h2>
+                            <div class="flex items-center gap-2">
+                                <h2 id="profileName" class="font-bold text-sm text-slate-900">جاري التحميل...</h2>
+                                <span id="supervisorBadge" class="hidden text-[9px] bg-amber-500/20 text-amber-600 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">⭐ مشرف</span>
+                            </div>
                             <p class="text-[11px] text-slate-400 mt-0.5">Mid Mile Associate</p>
                             <p class="text-[10px] text-blue-500 font-bold">موقع العمل: <span id="profileBranch">الرئيسي</span></p>
                         </div>
@@ -83,7 +86,16 @@
                 </div>
             </div>
 
-            <!-- 3. القائمة والملف الشخصي -->
+            <!-- 3. لوحة إشراف المشرف (تظهر فقط لو الموظف مرقى كمشرف) -->
+            <div id="tabContent-supervision" class="hidden space-y-4 text-right">
+                <h2 class="text-lg font-bold text-amber-600">⭐ لوحة إشراف الزملاء (Supervisor Panel)</h2>
+                <p class="text-xs text-slate-500">مراجعة واعتماد طلبات الإجازات والأذونات المقدمة من الموظفين:</p>
+                <div id="supervisorRequestsContainer" class="space-y-3">
+                    <p class="text-xs text-slate-400 text-center py-4">جاري التحميل...</p>
+                </div>
+            </div>
+
+            <!-- 4. القائمة والملف الشخصي -->
             <div id="tabContent-menu" class="hidden space-y-4 text-right">
                 <h2 class="text-lg font-bold text-slate-900">الملف الشخصي والقائمة</h2>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3 text-xs">
@@ -104,10 +116,12 @@
 
         </div>
 
-        <!-- شريط التنقل السفلي -->
-        <div class="bg-white border-t border-slate-100 pt-3 pb-1 flex justify-around items-center text-[11px] text-slate-400">
+        <!-- شريط التنقل السفلي المتكيف مع صلاحية المشرف -->
+        <div id="bottomNavBar" class="bg-white border-t border-slate-100 pt-3 pb-1 flex justify-around items-center text-[11px] text-slate-400">
             <button onclick="switchTab('menu')" id="nav-menu" class="flex flex-col items-center"><span>☰</span><span class="mt-0.5">القائمة</span></button>
             <button onclick="switchTab('requests')" id="nav-requests" class="flex flex-col items-center"><span>📄</span><span class="mt-0.5">طلباتي</span></button>
+            <!-- زرار الإشراف يظهر فقط للمشرفين -->
+            <button onclick="switchTab('supervision')" id="nav-supervision" class="hidden flex-col items-center text-amber-600 font-bold"><span>⭐</span><span class="mt-0.5">الإشراف</span></button>
             <div onclick="openRequestModal()" class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 cursor-pointer hover:bg-blue-700">＋</div>
             <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center text-blue-600 font-bold"><span>📅</span><span class="mt-0.5">الجدول</span></button>
         </div>
@@ -201,6 +215,14 @@
                             localStorage.setItem('darwin_emp_phone', phone);
                         }
 
+                        // فحص صلاحية المشرف وإظهار زرار الإشراف تلقائياً في تطبيقه لو هو مشرف
+                        if(emp.role === 'supervisor') {
+                            document.getElementById('supervisorBadge').classList.remove('hidden');
+                            document.getElementById('nav-supervision').classList.remove('hidden');
+                            document.getElementById('nav-supervision').classList.add('flex');
+                            loadSupervisorRequests();
+                        }
+
                         if(emp.managerId) {
                             get(ref(database, `companiesData/${currentCompany}/employees/${emp.managerId}`)).then(mSnap => {
                                 if(mSnap.exists()) {
@@ -256,17 +278,25 @@
         }
 
         window.switchTab = function(tabName) {
-            ['schedule', 'requests', 'menu'].forEach(t => {
-                document.getElementById(`tabContent-${t}`).classList.add('hidden');
+            ['schedule', 'requests', 'supervision', 'menu'].forEach(t => {
+                const el = document.getElementById(`tabContent-${t}`);
+                if(el) el.classList.add('hidden');
                 const nav = document.getElementById(`nav-${t}`);
-                if(nav) nav.className = "flex flex-col items-center text-slate-400";
+                if(nav && t !== 'supervision') nav.className = "flex flex-col items-center text-slate-400";
+                if(nav && t === 'supervision') nav.className = "hidden flex-col items-center text-amber-600 font-bold";
             });
-            document.getElementById(`tabContent-${tabName}`).classList.remove('hidden');
-            const activeNav = document.getElementById(`nav-${tabName}`);
-            if(activeNav) activeNav.className = "flex flex-col items-center text-blue-600 font-bold";
+
+            const targetTab = document.getElementById(`tabContent-${tabName}`);
+            if(targetTab) targetTab.classList.remove('hidden');
+
+            if(tabName === 'supervision' && currentEmp && currentEmp.role === 'supervisor') {
+                document.getElementById('nav-supervision').className = "flex flex-col items-center text-amber-600 font-bold";
+            } else {
+                const activeNav = document.getElementById(`nav-${tabName}`);
+                if(activeNav) activeNav.className = "flex flex-col items-center text-blue-600 font-bold";
+            }
         }
 
-        // شريط الأيام التفاعلي الكامل
         function renderDaysBar(activeDateKey) {
             const daysBar = document.getElementById('daysBar');
             const now = new Date();
@@ -413,6 +443,45 @@
                 if(!found) {
                     container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">لا توجد طلبات سابقة.</p>';
                 }
+            });
+        }
+
+        // جلب واعتماد طلبات الزملاء للمشرفين داخل تطبيقهم الموحد
+        function loadSupervisorRequests() {
+            onValue(ref(database, `companiesData/${currentCompany}/requests`), (snapshot) => {
+                const container = document.getElementById('supervisorRequestsContainer');
+                container.innerHTML = '';
+                let found = false;
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const req = child.val();
+                        const key = child.key;
+                        found = true;
+                        container.innerHTML += `
+                            <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-xs space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <p class="font-bold text-slate-900">${req.empName} <span class="text-slate-400 font-mono">[${req.empId}]</span></p>
+                                    <span class="text-[10px] bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">${req.status}</span>
+                                </div>
+                                <p class="text-blue-600 font-bold">النوع: ${req.type}</p>
+                                <p class="text-slate-600">التفاصيل: ${req.details}</p>
+                                <div class="flex gap-2 pt-1">
+                                    <button onclick="updateSupRequest('${key}', 'مقبول')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded font-bold">قبول</button>
+                                    <button onclick="updateSupRequest('${key}', 'مرفوض')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded font-bold">رفض</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                if(!found) {
+                    container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">لا توجد طلبات معلقة من الموظفين.</p>';
+                }
+            });
+        }
+
+        window.updateSupRequest = function(key, status) {
+            update(ref(database, `companiesData/${currentCompany}/requests/${key}`), { status: status }).then(() => {
+                alert(`تم تحديث حالة الطلب إلى: (${status}) بنجاح!`);
             });
         }
 
