@@ -14,7 +14,7 @@
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-blue-400" id="companyHeaderName">DARWIN HR - إدارة الشركة</h1>
-                <p class="text-slate-400 text-sm mt-1">توليد أكواد الموظفين، الفروع، وسجلات البصمات</p>
+                <p class="text-slate-400 text-sm mt-1">توليد أكواد الموظفين الذكية، الفروع، وسجلات البصمات</p>
             </div>
             <div class="flex gap-3">
                 <button onclick="exportAttendanceToExcel()" class="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-xl text-sm font-bold">📊 تقارير Excel</button>
@@ -55,8 +55,8 @@
                     <thead>
                         <tr class="border-b border-slate-800 text-slate-400">
                             <th class="p-3">صورة</th>
-                            <th class="p-3">كود الدخول التلقائي للموظف</th>
-                            <th class="p-3">الاسم والبيانات</th>
+                            <th class="p-3">كود الدخول الموحد (اختصار الشركة + الرقم)</th>
+                            <th class="p-3">اسم الموظف والبيانات</th>
                             <th class="p-3">الراتب</th>
                             <th class="p-3">الإجراءات</th>
                         </tr>
@@ -72,11 +72,18 @@
         const currentCompany = localStorage.getItem('darwin_current_company') || 'main_company';
         let companyPrefix = "cmp";
 
+        // سحب اسم الشركة الحقيقي وتوليد أول 3 حروف صحيحة منه
         get(ref(database, `companies/${currentCompany}`)).then(snap => {
             if(snap.exists()) {
-                const compName = snap.val().name;
+                const compName = snap.val().name || "company";
                 document.getElementById('companyHeaderName').innerText = "شركة: " + compName;
-                companyPrefix = currentCompany.replace('COMP-', '').substring(0, 3).toLowerCase();
+                // استخراج أول 3 حروف إنجليزية من اسم الشركة (ولو بالعربي بياخد أول حروف أو بيولد افتراضي آمن)
+                let cleanName = compName.replace(/[^a-zA-Z]/g, '');
+                if(cleanName.length >= 3) {
+                    companyPrefix = cleanName.substring(0, 3).toLowerCase();
+                } else {
+                    companyPrefix = currentCompany.replace('COMP-', '').substring(0, 3).toLowerCase();
+                }
             }
         });
 
@@ -147,9 +154,9 @@
                         <tr class="border-b border-slate-800/60">
                             <td class="p-3"><img src="${emp.profileImg || 'https://via.placeholder.com/60'}" class="w-10 h-10 rounded-full object-cover"></td>
                             <td class="p-3 font-mono font-bold text-amber-400 text-base">${unifiedLoginCode}</td>
-                            <td class="p-3 font-bold">${emp.name}<br><span class="text-xs text-slate-400">${emp.phone}</span></td>
+                            <td class="p-3 font-bold">${emp.name}<br><span class="text-xs text-slate-400">هاتف: ${emp.phone}</span></td>
                             <td class="p-3 text-xs">
-                                <input type="number" id="pay_${emp.empId}" value="${emp.finalNetPay || 0}" class="w-20 bg-slate-955 border border-slate-800 p-1 rounded text-xs">
+                                <input type="number" id="pay_${emp.empId}" value="${emp.finalNetPay || 0}" class="w-20 bg-slate-950 border border-slate-800 p-1 rounded text-xs">
                                 <button onclick="updatePay('${emp.empId}')" class="bg-emerald-600 px-2 py-1 rounded text-[10px] mt-1 block">اعتماد</button>
                             </td>
                             <td class="p-3 space-y-1">
