@@ -33,21 +33,22 @@
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl font-bold text-red-400">👑 مركز السوبر أدمن المسيطر</h1>
-                <p class="text-slate-400 text-xs mt-1">إنشاء الشركات، توليد الأكواد، وإمكانية الدخول لأي شركة وإدارتها فوراً</p>
+                <p class="text-slate-400 text-xs mt-1">إضافة الشركات، أرقام أصحابها، توليد الأكواد، وإدارة الشركات بالكامل</p>
             </div>
             <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold">تسجيل خروج</button>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- 1. إضافة الشركات وعرضها مع إمكانية الدخول لإدارتها -->
+            <!-- 1. إضافة الشركات مع الاسم والرقم والكود التلقائي -->
             <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h2 class="text-base font-bold text-blue-400">🏢 إدارة الشركات وكوادها التلقائية</h2>
+                <h2 class="text-base font-bold text-blue-400">🏢 إضافة شركة جديدة مع رقم المالك</h2>
                 <input type="text" id="companyNameInput" placeholder="اسم الشركة (مثال: شركة النور)" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
                 <input type="text" id="ownerNameInput" placeholder="اسم صاحب الشركة / المدير" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
-                <button onclick="generateAndSaveCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2.5 rounded-xl text-xs">إنشاء الشركة وتوليد كود تلقائي</button>
+                <input type="text" id="ownerPhoneInput" placeholder="رقم هاتف صاحب الشركة" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
+                <button onclick="generateAndSaveCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2.5 rounded-xl text-xs">إنشاء الشركة وتوليد كود الدخول</button>
                 
                 <div class="pt-2">
-                    <p class="text-xs text-slate-400 mb-2 font-bold">الشركات المسجلة (يمكنك الدخول لأي منها وإدارتها):</p>
+                    <p class="text-xs text-slate-400 mb-2 font-bold">الشركات المسجلة (الاسم، المالك، الرقم، والكود):</p>
                     <div id="companiesListContainer" class="space-y-2 max-h-48 overflow-y-auto text-xs">
                         <p class="text-slate-500">جاري جلب الشركات...</p>
                     </div>
@@ -99,8 +100,9 @@
         window.generateAndSaveCompany = function() {
             const companyName = document.getElementById('companyNameInput').value.trim();
             const ownerName = document.getElementById('ownerNameInput').value.trim();
+            const ownerPhone = document.getElementById('ownerPhoneInput').value.trim();
 
-            if(!companyName || !ownerName) { alert('أدخل اسم الشركة واسم صاحبها'); return; }
+            if(!companyName || !ownerName || !ownerPhone) { alert('أدخل بيانات الشركة كاملة (الاسم، المالك، ورقم الهاتف)'); return; }
 
             const autoCode = 'COMP-' + Math.floor(1000 + Math.random() * 9000);
 
@@ -108,11 +110,13 @@
                 companyCode: autoCode,
                 name: companyName,
                 owner: ownerName,
+                phone: ownerPhone,
                 createdAt: new Date().toLocaleString()
             }).then(() => {
-                alert(`🎉 تم إنشاء الشركة بنجاح!\nاسم الشركة: ${companyName}\n\n🔑 كود الدخول الخاص بها: [${autoCode}]`);
+                alert(`🎉 تم إنشاء الشركة بنجاح!\nاسم الشركة: ${companyName}\nمالكها: ${ownerName} (${ownerPhone})\n\n🔑 كود الدخول: [${autoCode}]`);
                 document.getElementById('companyNameInput').value = '';
                 document.getElementById('ownerNameInput').value = '';
+                document.getElementById('ownerPhoneInput').value = '';
             });
         }
 
@@ -128,11 +132,11 @@
                             <div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center border border-slate-800">
                                 <div>
                                     <p class="font-bold text-blue-400">${comp.name}</p>
-                                    <p class="text-[11px] text-slate-300">المالك: ${comp.owner || 'غير محدد'}</p>
+                                    <p class="text-[11px] text-slate-300">المالك: ${comp.owner || '---'} (${comp.phone || '---'})</p>
                                     <p class="text-[10px] text-amber-400 font-mono mt-0.5">الكود: ${key}</p>
                                 </div>
                                 <div class="flex gap-1.5">
-                                    <button onclick="loginAsCompany('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">دخول لإدارتها</button>
+                                    <button onclick="loginAsCompany('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">إدارة الشركة</button>
                                     <button onclick="deleteCompany('${key}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2 py-1.5 rounded-lg text-[10px] font-bold transition">حذف</button>
                                 </div>
                             </div>
@@ -144,7 +148,6 @@
             });
         }
 
-        // ميزة الدخول لأي شركة وإدارتها مباشرة من السوبر أدمن
         window.loginAsCompany = function(code) {
             localStorage.setItem('darwin_current_company', code);
             window.location.href = 'company-admin.html';
