@@ -14,7 +14,7 @@
     <div id="superLoginModal" class="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-6 text-center">
         <div>
             <h1 class="text-3xl font-extrabold text-red-500 mb-1">SUPER ADMIN</h1>
-            <p class="text-xs text-slate-400">لوحة التحكم العليا وإدارة النظام والشركات</p>
+            <p class="text-xs text-slate-400">لوحة التحكم العليا وإدارة الشركات والتحكم الشامل</p>
         </div>
         <div class="space-y-4 text-right">
             <div>
@@ -33,21 +33,21 @@
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl font-bold text-red-400">👑 مركز السوبر أدمن المسيطر</h1>
-                <p class="text-slate-400 text-xs mt-1">إضافة الشركات وتوليد الأكواد التلقائية لأصحاب الشركات للتحكم بموظفيهم</p>
+                <p class="text-slate-400 text-xs mt-1">إنشاء الشركات، توليد الأكواد، وإمكانية الدخول لأي شركة وإدارتها فوراً</p>
             </div>
             <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold">تسجيل خروج</button>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- 1. إنشاء شركة جديدة وتوليد كود تلقائي -->
+            <!-- 1. إضافة الشركات وعرضها مع إمكانية الدخول لإدارتها -->
             <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h2 class="text-base font-bold text-blue-400">🏢 إضافة شركة جديدة وتوليد كود الدخول</h2>
-                <input type="text" id="companyNameInput" placeholder="اسم الشركة (مثال: شركة النور للتجارة)" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
-                <input type="text" id="ownerNameInput" placeholder="اسم صاحب الشركة / المدير المسئول" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
-                <button onclick="generateAndSaveCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2.5 rounded-xl text-xs">إنشاء الشركة وتوليد كود الدخول تلقائياً</button>
+                <h2 class="text-base font-bold text-blue-400">🏢 إدارة الشركات وكوادها التلقائية</h2>
+                <input type="text" id="companyNameInput" placeholder="اسم الشركة (مثال: شركة النور)" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
+                <input type="text" id="ownerNameInput" placeholder="اسم صاحب الشركة / المدير" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
+                <button onclick="generateAndSaveCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2.5 rounded-xl text-xs">إنشاء الشركة وتوليد كود تلقائي</button>
                 
                 <div class="pt-2">
-                    <p class="text-xs text-slate-400 mb-2 font-bold">الشركات المسجلة وأكواد دخولها:</p>
+                    <p class="text-xs text-slate-400 mb-2 font-bold">الشركات المسجلة (يمكنك الدخول لأي منها وإدارتها):</p>
                     <div id="companiesListContainer" class="space-y-2 max-h-48 overflow-y-auto text-xs">
                         <p class="text-slate-500">جاري جلب الشركات...</p>
                     </div>
@@ -60,7 +60,7 @@
                 <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
                     <h2 class="text-base font-bold text-amber-400">🔑 تغيير كلمة مرور السوبر أدمن</h2>
                     <input type="password" id="newSuperPass" placeholder="كلمة المرور الجديدة" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
-                    <button onclick="changeSuperPassword()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2.5 rounded-xl text-xs">تغيير وحذف القديمة نهائياً</button>
+                    <button onclick="changeSuperPassword()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2.5 rounded-xl text-xs">تغيير ومسح القديمة نهائياً</button>
                     <p class="text-[10px] text-slate-500">مفتاح الطوارئ الاحتياطي الثابت: <span class="font-mono text-slate-300">darwin_master_2026</span></p>
                 </div>
 
@@ -96,14 +96,12 @@
             }
         }
 
-        // توليد كود تلقائي فريد لكل شركة جديدة
         window.generateAndSaveCompany = function() {
             const companyName = document.getElementById('companyNameInput').value.trim();
             const ownerName = document.getElementById('ownerNameInput').value.trim();
 
             if(!companyName || !ownerName) { alert('أدخل اسم الشركة واسم صاحبها'); return; }
 
-            // توليد كود فريد تلقائياً (مثال: COMP-8492)
             const autoCode = 'COMP-' + Math.floor(1000 + Math.random() * 9000);
 
             set(ref(database, `companies/${autoCode}`), {
@@ -112,7 +110,7 @@
                 owner: ownerName,
                 createdAt: new Date().toLocaleString()
             }).then(() => {
-                alert(`🎉 تم إنشاء الشركة بنجاح!\nاسم الشركة: ${companyName}\nصاحبها: ${ownerName}\n\n🔑 كود الدخول الخاص به (يستخدمه لفتح لوحة الأدمن الخاصة به): [${autoCode}]`);
+                alert(`🎉 تم إنشاء الشركة بنجاح!\nاسم الشركة: ${companyName}\n\n🔑 كود الدخول الخاص بها: [${autoCode}]`);
                 document.getElementById('companyNameInput').value = '';
                 document.getElementById('ownerNameInput').value = '';
             });
@@ -131,9 +129,12 @@
                                 <div>
                                     <p class="font-bold text-blue-400">${comp.name}</p>
                                     <p class="text-[11px] text-slate-300">المالك: ${comp.owner || 'غير محدد'}</p>
-                                    <p class="text-[10px] text-amber-400 font-mono mt-0.5">كود الدخول: ${key}</p>
+                                    <p class="text-[10px] text-amber-400 font-mono mt-0.5">الكود: ${key}</p>
                                 </div>
-                                <button onclick="deleteCompany('${key}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">حذف</button>
+                                <div class="flex gap-1.5">
+                                    <button onclick="loginAsCompany('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">دخول لإدارتها</button>
+                                    <button onclick="deleteCompany('${key}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2 py-1.5 rounded-lg text-[10px] font-bold transition">حذف</button>
+                                </div>
                             </div>
                         `;
                     });
@@ -141,6 +142,12 @@
                     container.innerHTML = '<p class="text-slate-500">لا توجد شركات مسجلة بعد.</p>';
                 }
             });
+        }
+
+        // ميزة الدخول لأي شركة وإدارتها مباشرة من السوبر أدمن
+        window.loginAsCompany = function(code) {
+            localStorage.setItem('darwin_current_company', code);
+            window.location.href = 'company-admin.html';
         }
 
         window.deleteCompany = function(code) {
