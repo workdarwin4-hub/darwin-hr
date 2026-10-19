@@ -26,7 +26,7 @@
         
         <div class="overflow-y-auto max-h-[690px] pb-4 space-y-4">
             
-            <!-- 1. شاشة الجدول الرئيسية (Schedule) -->
+            <!-- 1. شاشة الجدول الرئيسية (Schedule & Live Date Picker) -->
             <div id="tabContent-schedule" class="space-y-4">
                 <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
@@ -40,15 +40,15 @@
                     <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 shadow-sm cursor-pointer" onclick="switchTab('menu')">🔔</div>
                 </div>
 
-                <!-- شريط الأيام الأفقي (متفاعل ويقلب اليوم فعلاً) -->
+                <!-- شريط الأيام الأفقي المتفاعل مع الدائرة الزرقاء -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
                     <div class="flex justify-between items-center mb-2 px-1">
-                        <span id="selectedDateHeader" class="text-xs font-bold text-blue-600">📅 عرض جدول اليوم: اليوم</span>
+                        <span id="selectedDateHeader" class="text-xs font-bold text-blue-600">📅 عرض جدول يوم: اليوم</span>
                     </div>
                     <div id="daysBar" class="flex justify-around items-center text-xs"></div>
                 </div>
 
-                <!-- بطاقة حالة اليوم المعروض -->
+                <!-- بطاقة حالة اليوم المعروض والعداد الحقيقي -->
                 <div id="dayDetailsCard" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm text-center space-y-3">
                     <div class="text-right flex justify-between items-center">
                         <div>
@@ -71,18 +71,6 @@
                         <span>➔</span>
                     </button>
                 </div>
-
-                <!-- لوحة المشرف المصغرة -->
-                <div id="supervisorPanel" class="hidden bg-purple-50 p-4 rounded-2xl border border-purple-200 text-right space-y-2">
-                    <p class="text-xs font-bold text-purple-700">⭐ لوحة تحكم المشرف (تسجيل حضور للزملاء)</p>
-                    <div class="space-y-2 text-xs">
-                        <input type="text" id="supTargetEmpId" placeholder="كود الموظف (HR ID)" class="w-full bg-white border border-purple-200 p-2 rounded-xl text-center">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="supervisorAction('دخول')" class="bg-purple-600 text-white font-bold py-2 rounded-xl">تسجيل حضور</button>
-                            <button onclick="supervisorAction('خروج')" class="bg-amber-600 text-white font-bold py-2 rounded-xl">تسجيل انصراف</button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- 2. لوحة المعلومات -->
@@ -103,14 +91,14 @@
                 <div id="requestsListContainer" class="space-y-3"></div>
             </div>
 
-            <!-- 4. القائمة والملف الشخصي (يظهر المدير المباشر والرقم القومي) -->
+            <!-- 4. القائمة والملف الشخصي -->
             <div id="tabContent-menu" class="hidden space-y-4 text-right">
                 <h2 class="text-lg font-bold text-slate-900">الملف الشخصي والقائمة</h2>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2 text-xs">
                     <p class="font-bold text-blue-600">معلومات الملف الشخصي:</p>
                     <p>كود الموظف (HR ID): <span id="infoEmpId" class="font-mono font-bold">---</span></p>
                     <p>الرقم القومي: <span id="infoNationalId" class="font-mono font-bold text-amber-600">---</span></p>
-                    <p>المدير المباشر (HR ID): <span id="infoManagerId" class="font-mono font-bold text-purple-600">---</span></p>
+                    <p>المدير المباشر: <span id="infoManagerName" class="font-bold text-purple-600">جاري الجلب...</span></p>
                     <p>تاريخ الالتحاق: <span class="font-mono">2026-05-07</span></p>
                 </div>
                 <button onclick="empLogout()" class="w-full bg-red-50 text-red-600 font-bold py-3 rounded-2xl text-xs mt-4">تسجيل الخروج</button>
@@ -160,8 +148,7 @@
 
     <script type="module">
         import { database, ref, get, push, onValue } from "./firebase-config.js";
-        const currentCompany = localStorage.getItem('darwin_current_company');
-        if(!currentCompany) window.location.href = 'index.html';
+        const currentCompany = localStorage.getItem('darwin_current_company') || 'main_company';
 
         let currentEmp = null;
         let empBranch = null;
@@ -179,7 +166,7 @@
             } else {
                 document.getElementById('loginScreen').classList.remove('hidden');
             }
-            renderDaysBar();
+            renderDaysBar(new Date().toLocaleDateString());
         }
 
         window.empLogin = function() {
@@ -200,6 +187,18 @@
                             localStorage.setItem('darwin_emp_phone', phone);
                         }
 
+                        if(emp.managerId) {
+                            get(ref(database, `companiesData/${currentCompany}/employees/${emp.managerId}`)).then(mSnap => {
+                                if(mSnap.exists()) {
+                                    document.getElementById('infoManagerName').innerText = mSnap.val().name + ` (HR ID: ${emp.managerId})`;
+                                } else {
+                                    document.getElementById('infoManagerName').innerText = `HR ID: ${emp.managerId}`;
+                                }
+                            });
+                        } else {
+                            document.getElementById('infoManagerName').innerText = "غير محدد";
+                        }
+
                         get(ref(database, `companiesData/${currentCompany}/branches/${emp.branchId}`)).then((bSnap) => {
                             if(bSnap.exists()) empBranch = bSnap.val();
                             document.getElementById('profileBranch').innerText = empBranch ? empBranch.name : 'الفرع الرئيسي';
@@ -207,11 +206,6 @@
                             document.getElementById('profileImg').src = emp.profileImg || 'https://via.placeholder.com/60';
                             document.getElementById('infoEmpId').innerText = emp.empId;
                             document.getElementById('infoNationalId').innerText = emp.nationalId || 'غير مسجل';
-                            document.getElementById('infoManagerId').innerText = emp.managerId ? 'HR ID: ' + emp.managerId : 'غير محدد';
-                            
-                            if(emp.role === 'supervisor') {
-                                document.getElementById('supervisorPanel').classList.remove('hidden');
-                            }
 
                             document.getElementById('loginScreen').classList.add('hidden');
                             document.getElementById('dashboardScreen').classList.remove('hidden');
@@ -239,8 +233,8 @@
             document.getElementById(`nav-${tabName}`).className = "flex flex-col items-center text-blue-600 font-bold";
         }
 
-        // تفاعل شريط الأيام بحيث يقلب التاريخ المعروض فعلاً
-        function renderDaysBar() {
+        // شريط الأيام التفاعلي مع تفعيل الدائرة الزرقاء وتغيير اليوم المعروض
+        function renderDaysBar(activeDateKey) {
             const daysBar = document.getElementById('daysBar');
             const now = new Date();
             daysBar.innerHTML = '';
@@ -248,9 +242,11 @@
                 let d = new Date();
                 d.setDate(now.getDate() + i);
                 let dateStrKey = d.toLocaleDateString();
-                let isToday = (i === 0);
+                let isSelected = (dateStrKey === activeDateKey);
+
                 daysBar.innerHTML += `
-                    <div onclick="selectDateToView('${dateStrKey}', '${d.toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}')" class="flex flex-col items-center p-2 rounded-2xl cursor-pointer transition ${isToday ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-400 hover:bg-slate-50'}">
+                    <div onclick="selectDateToView('${dateStrKey}', '${d.toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}')" 
+                         class="flex flex-col items-center p-2 rounded-2xl cursor-pointer transition ${isSelected ? 'bg-blue-600 text-white font-bold shadow-md scale-105' : 'text-slate-400 hover:bg-slate-50'}">
                         <span class="text-sm">${d.getDate()}</span>
                         <span class="text-[10px] mt-0.5">${d.toLocaleDateString('ar-EG', { weekday: 'short' })}</span>
                     </div>
@@ -261,6 +257,7 @@
         window.selectDateToView = function(dateKey, formattedTitle) {
             selectedDateStr = dateKey;
             document.getElementById('selectedDateHeader').innerText = `📅 عرض جدول يوم: ${formattedTitle}`;
+            renderDaysBar(dateKey);
             if(currentEmp) checkDateAttendanceStatus(currentEmp.empId, dateKey);
         }
 
@@ -273,7 +270,10 @@
                     snapshot.forEach(child => {
                         let log = child.val();
                         if(log.empId === empId && log.time.includes(dateStr)) {
-                            if(log.type === 'دخول') hasIn = true;
+                            if(log.type === 'دخول') {
+                                hasIn = true;
+                                if(log.timestamp) checkInTimeEpoch = log.timestamp;
+                            }
                             if(log.type === 'خروج') hasOut = true;
                         }
                     });
@@ -281,13 +281,14 @@
 
                 const btn = document.getElementById('punchActionBtn');
                 const statusText = document.getElementById('punchStatusText');
-                const isTodayActive = dateStr === new Date().toLocaleDateString();
+                const isTodayActive = (dateStr === new Date().toLocaleDateString());
 
                 if(!isTodayActive) {
-                    statusText.innerText = `سجل يوم ${dateStr}: حضور وانصراف الأيام السابقة أرشيف معتمد.`;
-                    btn.innerText = "عرض أرشيف اليوم";
+                    statusText.innerText = `⚠️ سجل يوم ${dateStr} هو أرشيف تاريخي (غير مسموح بالبصمة بأثر رجعي).`;
+                    btn.innerText = "أرشيف يوم سابق (مغلق)";
                     btn.disabled = true;
                     btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-2xl text-sm cursor-not-allowed";
+                    document.getElementById('workTimerDisplay').innerText = "أرشيف";
                     return;
                 }
 
@@ -299,18 +300,33 @@
                     btn.disabled = false;
                 } else if(hasIn && !hasOut) {
                     currentPunchState = 'خروج';
-                    statusText.innerText = "تم تسجيل الحضور. يعمل العداد حتى انقضاء ساعات الشفت";
+                    statusText.innerText = "تم تسجيل الحضور. العداد يعمل حتى الانصراف";
                     btn.innerHTML = `<span>تسجيل الانصراف (خروج)</span><span>←</span>`;
                     btn.className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm flex items-center justify-center gap-2";
                     btn.disabled = false;
+                    startWorkTimer();
                 } else {
                     currentPunchState = 'مكتمل';
                     statusText.innerText = "✅ تم إتمام بصمات اليوم بنجاح.";
                     btn.innerText = "أتممت بصمات اليوم";
                     btn.disabled = true;
                     btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-2xl text-sm cursor-not-allowed";
+                    document.getElementById('workTimerDisplay').innerText = "مكتمل";
                 }
             });
+        }
+
+        // عداد العمل الحقيقي والتصاعدي
+        function startWorkTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(!checkInTimeEpoch) return;
+                const elapsedSecs = Math.floor((Date.now() - checkInTimeEpoch) / 1000);
+                const hrs = String(Math.floor(elapsedSecs / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((elapsedSecs % 3600) / 60)).padStart(2, '0');
+                const secs = String(elapsedSecs % 60).padStart(2, '0');
+                document.getElementById('workTimerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
         }
 
         window.openRequestModal = function() { document.getElementById('requestModal').classList.remove('hidden'); }
@@ -329,21 +345,6 @@
                 alert('تم إرسال طلبك بنجاح للإدارة!');
                 closeRequestModal();
                 switchTab('requests');
-            });
-        }
-
-        window.supervisorAction = function(type) {
-            const targetId = document.getElementById('supTargetEmpId').value.trim();
-            if(!targetId) { alert('أدخل كود الموظف'); return; }
-
-            get(ref(database, `companiesData/${currentCompany}/employees/${targetId}`)).then(snap => {
-                if(snap.exists()) {
-                    const targetEmp = snap.val();
-                    push(ref(database, `companiesData/${currentCompany}/attendance`), {
-                        empId: targetEmp.empId, name: targetEmp.name, branch: empBranch ? empBranch.name : 'الفرع',
-                        type: type, time: new Date().toLocaleString(), timestamp: Date.now(), location: 'إداري'
-                    }).then(() => alert(`تم تسجيل (${type}) للموظف ${targetEmp.name}`));
-                } else { alert('الموظف غير موجود!'); }
             });
         }
 
