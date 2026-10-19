@@ -13,8 +13,8 @@
         
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
-                <h1 class="text-3xl font-bold text-blue-400" id="companyHeaderName">DARWIN HR - الإدارة العليا</h1>
-                <p class="text-slate-400 text-sm mt-1">التحكم المطلق، إعدادات الأمان، وتعطيل/تشغيل التطبيقات</p>
+                <h1 class="text-3xl font-bold text-blue-400" id="companyHeaderName">DARWIN HR - إدارة الشركة</h1>
+                <p class="text-slate-400 text-sm mt-1">إدارة الفروع، الموظفين، وأرصدة البصمات والرواتب</p>
             </div>
             <div class="flex gap-3">
                 <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-bold shadow-lg">تطبيق الموظفين</a>
@@ -22,26 +22,7 @@
             </div>
         </header>
 
-        <!-- لوحة الأمان وتغيير الباسورد وتعطيل السيستم -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-                <h2 class="text-lg font-bold text-amber-400">🔐 إعدادات أمان السوبر أدمن</h2>
-                <input type="password" id="newAdminPass" placeholder="كلمة المرور الجديدة للأدمن" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
-                <button onclick="updateAdminPassword()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2.5 rounded-xl text-sm">تغيير ومسح الباسورد القديم نهائياً</button>
-                <p class="text-[10px] text-slate-500">ملاحظة: مفتاح الطوارئ الاحتياطي للنسخة هو: <span class="font-mono text-slate-300">darwin_master_2026</span></p>
-            </div>
-
-            <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-                <h2 class="text-lg font-bold text-red-400">⚡ حالة النظام (تشغيل أو تعطيل التطبيق)</h2>
-                <p class="text-xs text-slate-400">يمكنك تعطيل السيستم بالكامل أو إعادة تشغيله في أي وقت:</p>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="toggleSystemStatus(true)" class="bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-xl text-xs">🟢 تشغيل السيستم</button>
-                    <button onclick="toggleSystemStatus(false)" class="bg-red-600 hover:bg-red-700 font-bold py-3 rounded-xl text-xs">🔴 تعطيل السيستم صيانة</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- الفروع والموظفين -->
+        <!-- إدارة الفروع والموظفين للشركة فقط -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <h2 class="text-lg font-bold text-blue-400">🏢 إعداد الفروع ومواقع العمل (GPS)</h2>
@@ -107,19 +88,6 @@
         get(ref(database, `companies/${currentCompany}`)).then(snap => {
             if(snap.exists()) document.getElementById('companyHeaderName').innerText = "شركة: " + snap.val().name;
         });
-
-        window.updateAdminPassword = function() {
-            const newPass = document.getElementById('newAdminPass').value.trim();
-            if(!newPass) { alert('أدخل كلمة المرور الجديدة'); return; }
-            update(ref(database, `companies/${currentCompany}`), {
-                customPassword: newPass
-            }).then(() => alert('تم تغيير باسورد السوبر أدمن وحذف القديم نهائياً!'));
-        }
-
-        window.toggleSystemStatus = function(status) {
-            set(ref(database, 'systemSettings/isSystemActive'), status)
-            .then(() => alert(status ? 'تم تفعيل السيستم بنجاح!' : 'تم تعطيل السيستم للصيانة بنجاح!'));
-        }
 
         window.fetchCurrentLocation = function() {
             if(!navigator.geolocation) { alert('المتصفح لا يدعم تحديد الموقع'); return; }
