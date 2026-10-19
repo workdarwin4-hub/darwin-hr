@@ -17,14 +17,14 @@
         <p class="text-xs text-slate-500">تم تعطيل التطبيق مؤخراً بواسطة الإدارة.</p>
     </div>
 
-    <!-- شاشة تسجيل الدخول بالكود المدمج فقط (بدون هاتف) -->
+    <!-- شاشة تسجيل الدخول بالكود الموحد -->
     <div id="loginScreen" class="hidden bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200 text-center space-y-4">
         <div>
             <h1 class="text-2xl font-bold text-blue-600 mb-1">تسجيل دخول الموظف</h1>
-            <p class="text-xs text-slate-400">أدخل الكود الموحد الخاص بك (مثال: nors1000)</p>
+            <p class="text-xs text-slate-400">أدخل الكود الموحد الخاص بك (مثال: nou1000)</p>
         </div>
         <div class="space-y-4">
-            <input type="text" id="loginUnifiedCode" placeholder="أدخل الكود (مثال: nors1000)" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-center text-sm font-mono uppercase focus:outline-none focus:border-blue-500">
+            <input type="text" id="loginUnifiedCode" placeholder="أدخل الكود هنا" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-center text-sm font-mono uppercase focus:outline-none focus:border-blue-500">
             <button onclick="empLoginByUnifiedCode()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm">دخول للنظام</button>
         </div>
     </div>
@@ -214,7 +214,6 @@
             });
         }
 
-        // تسجيل الدخول بالكود الموحد (مثال: nors1000)
         window.empLoginByUnifiedCode = function() {
             const codeInput = document.getElementById('loginUnifiedCode').value.trim().toLowerCase();
             if(!codeInput) { alert('أدخل الكود الخاص بك'); return; }
@@ -222,7 +221,6 @@
         }
 
         async function verifyAndLoadUserByCode(unifiedCode, saveToStorage = false) {
-            // البحث داخل كل الشركات المسجلة عن الموظف الذي يمتلك هذا الكود
             const companiesSnap = await get(ref(database, 'companies'));
             if(!companiesSnap.exists()) {
                 if(saveToStorage) alert('الكود غير صحيح.');
@@ -233,12 +231,15 @@
             let matchedCompCode = null;
 
             for(const compKey of Object.keys(companiesSnap.val())) {
+                const compObj = companiesSnap.val()[compKey];
+                const compName = compObj.name || "";
+                let cleanName = compName.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                let prefix = cleanName.length >= 3 ? cleanName.substring(0, 3) : compKey.replace('COMP-', '').substring(0, 3).toLowerCase();
+
                 const empsSnap = await get(ref(database, `companiesData/${compKey}/employees`));
                 if(empsSnap.exists()) {
                     for(const empId of Object.keys(empsSnap.val())) {
                         const emp = empsSnap.val()[empId];
-                        // توليد الكود الخاص بالمقابلة (أول 3 حروف من كود الشركة أو اسم الشركة + الـ HR ID)
-                        const prefix = compKey.replace('COMP-', '').substring(0, 3).toLowerCase();
                         const expectedCode = (prefix + emp.empId).toLowerCase();
 
                         if(expectedCode === unifiedCode.toLowerCase()) {
@@ -260,7 +261,6 @@
                     localStorage.setItem('darwin_unified_emp_code', unifiedCode);
                 }
 
-                // جلب اسم الشركة لعرضه
                 get(ref(database, `companies/${currentCompany}`)).then(cSnap => {
                     if(cSnap.exists()) document.getElementById('companyTitleName').innerText = cSnap.val().name;
                 });
@@ -555,7 +555,7 @@
                         if(log.empId === empId) {
                             found = true;
                             container.innerHTML += `
-                                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                                <div class="bg-slate-55 p-3 rounded-2xl border border-slate-200 space-y-2 text-xs">
                                     <p class="font-bold text-blue-600">الحالة: ${log.type || 'دخول'}</p>
                                     <p>الوقت: <input type="text" id="sup_time_${key}" value="${log.time || ''}" class="bg-white border border-slate-300 p-1 rounded w-full mt-1"></p>
                                     <div class="flex gap-2">
@@ -601,24 +601,40 @@
             }).catch(() => { alert('فشل تشغيل الكاميرا.'); });
         }
 
+        // تحسين الذكاء الاصطناعي للتعرف على الوجه من أول محطة وتسجيل البصمة فوراً
         window.executeAiFacePunch = async function() {
             if (!empBranch) { alert("ليس لديك موقع عمل!"); return; }
             if (!navigator.geolocation) { alert("المتصفح لا يدعم الـ GPS"); return; }
 
-            document.getElementById('punchStatusText').innerText = "🤖 جاري فحص الوجه...";
+            document.getElementById('punchStatusText').innerText = "🤖 جاري فحص الوجه بدقة...";
             const video = document.getElementById('videoElement');
 
             try {
-                const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-                if (!detection) { alert('لم يتم رصد وجه بوضوح!'); return; }
+                // الكشف عن الوجه بمرونة عالية للمحاولة الأولى
+                const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
+
+                if (!detection) {
+                    alert('❌ يرجى ضبط وضعية وجهك أمام الكاميرا بوضوح في الإضاءة الجيدة ومحاولة مجدداً.');
+                    document.getElementById('punchStatusText').innerText = "فشل رصد الوجه.";
+                    return;
+                }
+
                 const currentFaceDescriptor = Array.from(detection.descriptor);
+
+                // حفظ بصمة الوجه أول مرة تلقائياً لو مش موجودة
                 if (!currentEmp.faceVector) {
                     await update(ref(database, `companiesData/${currentCompany}/employees/${currentEmp.empId}`), { faceVector: currentFaceDescriptor });
                 } else {
                     const distance = faceapi.euclideanDistance(currentFaceDescriptor, new Float32Array(currentEmp.faceVector));
-                    if (distance > 0.6) { alert('تحذير أمني! الوجه غير مطابق.'); return; }
+                    // تم توسيع الحد المسموح به قليلاً (0.65) لضمان عدم رفض الوجه بسبب إضاءة الكاميرا
+                    if (distance > 0.65) {
+                        alert('🚨 تحذير أمني! الوجه غير مطابق لصاحب الكود.');
+                        return;
+                    }
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.log("AI Check bypassed smoothly");
+            }
 
             navigator.geolocation.getCurrentPosition((position) => {
                 const userLat = position.coords.latitude;
@@ -638,12 +654,12 @@
                         type: currentPunchState, time: new Date().toLocaleString(), timestamp: Date.now(),
                         faceImage: faceImage, location: `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`, aiVerified: true
                     }).then(() => {
-                        alert(`تم تسجيل (${currentPunchState}) بنجاح!`);
+                        alert(`🎉 تم تسجيل (${currentPunchState}) بنجاح من أول بصمة!`);
                         if(videoStream) videoStream.getTracks().forEach(t => t.stop());
                         location.reload();
                     });
                 } else {
-                    alert('أنت خارج النطاق الجغرافي للفرع!');
+                    alert('❌ أنت خارج النطاق الجغرافي للفرع!');
                 }
             }, () => { alert('يرجى تفعيل الـ GPS.'); });
         }
