@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - تسجيل الدخول</title>
+    <title>DARWIN HR - تسجيل دخول الشركات</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
@@ -21,18 +21,15 @@
 
         <div class="space-y-4 text-right">
             <div>
-                <label class="text-xs text-slate-400 mb-1 block">كود الشركة أو اسم الأدمن:</label>
-                <input type="text" id="companyCodeInput" placeholder="مثال: main_company" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                <label class="text-xs text-slate-400 mb-1 block">كود الشركة (التلقائي):</label>
+                <input type="text" id="companyCodeInput" placeholder="مثال: COMP-4829" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-center font-mono">
             </div>
-            <div>
-                <label class="text-xs text-slate-400 mb-1 block">كلمة المرور:</label>
-                <input type="password" id="adminPasswordInput" placeholder="كلمة المرور" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm focus:outline-none focus:border-blue-500">
-            </div>
-            <button onclick="loginCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl text-sm shadow-lg transition">دخول لوحة تحكم الأدمن</button>
+            <button onclick="loginCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl text-sm shadow-lg transition">دخول لوحة تحكم الشركة ➔</button>
         </div>
 
-        <div class="border-t border-slate-800 pt-4">
-            <a href="employee.html" class="block w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-bold py-2.5 rounded-xl text-xs hover:bg-emerald-600/30 transition">الانتقال إلى تطبيق الموظفين ➔</a>
+        <div class="border-t border-slate-800 pt-4 flex justify-between items-center text-xs">
+            <a href="employee.html" class="text-emerald-400 font-bold hover:underline">الانتقال لتطبيق الموظفين</a>
+            <a href="super-admin.html" class="text-red-400 font-bold hover:underline">دخول السوبر أدمن</a>
         </div>
     </div>
 
@@ -40,7 +37,6 @@
         import { database, ref, get } from "./firebase-config.js";
 
         window.onload = function() {
-            // التحقق مما إذا كان السيستم معطلاً بالكامل من قبل الإدارة
             get(ref(database, 'systemSettings/isSystemActive')).then(snap => {
                 if(snap.exists() && snap.val() === false) {
                     document.getElementById('maintenanceAlert').classList.remove('hidden');
@@ -49,25 +45,15 @@
         }
 
         window.loginCompany = function() {
-            const code = document.getElementById('companyCodeInput').value.trim().toLowerCase();
-            const pass = document.getElementById('adminPasswordInput').value.trim();
-            if(!code || !pass) { alert('أدخل كود الشركة وكلمة المرور'); return; }
+            const code = document.getElementById('companyCodeInput').value.trim();
+            if(!code) { alert('أدخل كود الشركة'); return; }
 
-            // التحقق من باسورد السوبر أدمن (الأساسي أو الطوارئ أو المخزن في قاعدة البيانات)
             get(ref(database, `companies/${code}`)).then((snapshot) => {
-                let validPass = "darwin_master_2026"; // النسخة الاحتياطية للطوارئ
-                let companyData = null;
-
                 if(snapshot.exists()) {
-                    companyData = snapshot.val();
-                    if(companyData.customPassword) validPass = companyData.customPassword;
-                }
-
-                if(pass === validPass || pass === "darwin_master_2026") {
-                    localStorage.setItem('darwin_current_company', code || 'main_company');
+                    localStorage.setItem('darwin_current_company', code);
                     window.location.href = 'company-admin.html';
                 } else {
-                    alert('كلمة المرور غير صحيحة!');
+                    alert('كود الشركة غير صحيح أو غير مسجل!');
                 }
             });
         }
