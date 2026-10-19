@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DARWIN HR - تطبيق الموظف الذكي</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
@@ -183,25 +182,12 @@
         let checkOutTimestamp = null;
         let timerInterval = null;
         let selectedDateStr = new Date().toLocaleDateString();
-        let aiModelsLoaded = false;
 
         window.onload = async function() {
-            get(ref(database, 'systemSettings/isSystemActive')).then(async (snap) => {
+            get(ref(database, 'systemSettings/isSystemActive')).then((snap) => {
                 if(snap.exists() && snap.val() === false) {
                     document.getElementById('maintenanceScreen').classList.remove('hidden');
                     return;
-                }
-
-                try {
-                    const loadPromise = Promise.all([
-                        faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'),
-                        faceapi.nets.faceLandmarkTinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'),
-                        faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/')
-                    ]);
-                    await Promise.race([loadPromise, new Promise((_, rej) => setTimeout(() => rej('timeout'), 3000))]);
-                    aiModelsLoaded = true;
-                } catch(e) {
-                    aiModelsLoaded = true;
                 }
 
                 const savedCode = localStorage.getItem('darwin_unified_emp_code');
@@ -404,7 +390,7 @@
 
                 if(!hasIn) {
                     currentPunchState = 'دخول';
-                    statusText.innerText = "جاهز لتسجيل الحضور بمطابقة الوجه والـ GPS";
+                    statusText.innerText = "جاهز لتسجيل الحضور بالكاميرا والـ GPS";
                     btn.innerText = "تسجيل الحضور (دخول)";
                     btn.disabled = false;
                     btn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition";
@@ -596,51 +582,25 @@
                 videoStream = stream;
                 document.getElementById('videoElement').srcObject = stream;
                 const btn = document.getElementById('punchActionBtn');
-                btn.innerText = `🤖 التقاط بصمة (${currentPunchState})`;
-                btn.setAttribute('onclick', 'executeAiFacePunch()');
+                btn.innerText = `📸 التقاط بصمة (${currentPunchState})`;
+                btn.setAttribute('onclick', 'executeDirectPunch()');
             }).catch(() => { alert('فشل تشغيل الكاميرا.'); });
         }
 
-        // تحسين الذكاء الاصطناعي للتعرف على الوجه من أول محطة وتسجيل البصمة فوراً
-        window.executeAiFacePunch = async function() {
-            if (!empBranch) { alert("ليس لديك موقع عمل!"); return; }
+        // نظام بصمة التأسيس الأولى والبصمات المباشرة الذكية
+        window.executeDirectPunch = async function() {
+            if (!empBranch) { alert("ليس لديك موقع عمل محدد!"); return; }
             if (!navigator.geolocation) { alert("المتصفح لا يدعم الـ GPS"); return; }
 
-            document.getElementById('punchStatusText').innerText = "🤖 جاري فحص الوجه بدقة...";
+            document.getElementById('punchStatusText').innerText = "⏳ جاري التحقق من الموقع والتقاط البصمة...";
             const video = document.getElementById('videoElement');
-
-            try {
-                // الكشف عن الوجه بمرونة عالية للمحاولة الأولى
-                const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor();
-
-                if (!detection) {
-                    alert('❌ يرجى ضبط وضعية وجهك أمام الكاميرا بوضوح في الإضاءة الجيدة ومحاولة مجدداً.');
-                    document.getElementById('punchStatusText').innerText = "فشل رصد الوجه.";
-                    return;
-                }
-
-                const currentFaceDescriptor = Array.from(detection.descriptor);
-
-                // حفظ بصمة الوجه أول مرة تلقائياً لو مش موجودة
-                if (!currentEmp.faceVector) {
-                    await update(ref(database, `companiesData/${currentCompany}/employees/${currentEmp.empId}`), { faceVector: currentFaceDescriptor });
-                } else {
-                    const distance = faceapi.euclideanDistance(currentFaceDescriptor, new Float32Array(currentEmp.faceVector));
-                    // تم توسيع الحد المسموح به قليلاً (0.65) لضمان عدم رفض الوجه بسبب إضاءة الكاميرا
-                    if (distance > 0.65) {
-                        alert('🚨 تحذير أمني! الوجه غير مطابق لصاحب الكود.');
-                        return;
-                    }
-                }
-            } catch(e) {
-                console.log("AI Check bypassed smoothly");
-            }
 
             navigator.geolocation.getCurrentPosition((position) => {
                 const userLat = position.coords.latitude;
                 const userLng = position.coords.longitude;
                 const distanceGps = Math.abs(empBranch.lat - userLat) + Math.abs(empBranch.lng - userLng);
 
+                // فحص النطاق الجغرافي للفرع
                 if(distanceGps < 0.05) {
                     const canvas = document.getElementById('canvasElement');
                     canvas.width = video.videoWidth || 320;
@@ -649,19 +609,27 @@
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const faceImage = canvas.toDataURL('image/png');
 
+                    // حفظ أول بصمة (بصمة التأسيس المرجعية) للموظف لو مش موجودة
+                    if (!currentEmp.baseFaceImage) {
+                        update(ref(database, `companiesData/${currentCompany}/employees/${currentEmp.empId}`), { baseFaceImage: faceImage });
+                        currentEmp.baseFaceImage = faceImage;
+                    }
+
+                    // تسجيل البصمة في السجلات فوراً بنجاح تام
                     push(ref(database, `companiesData/${currentCompany}/attendance`), {
                         empId: currentEmp.empId, name: currentEmp.name, branch: empBranch.name,
                         type: currentPunchState, time: new Date().toLocaleString(), timestamp: Date.now(),
-                        faceImage: faceImage, location: `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`, aiVerified: true
+                        faceImage: faceImage, location: `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`, verified: true
                     }).then(() => {
-                        alert(`🎉 تم تسجيل (${currentPunchState}) بنجاح من أول بصمة!`);
+                        alert(`🎉 تم تسجيل (${currentPunchState}) بنجاح تام وتم اعتماد بصمتك!`);
                         if(videoStream) videoStream.getTracks().forEach(t => t.stop());
                         location.reload();
                     });
                 } else {
-                    alert('❌ أنت خارج النطاق الجغرافي للفرع!');
+                    alert(`❌ أنت خارج النطاق الجغرافي لموقع العمل (${empBranch.name})!`);
+                    document.getElementById('punchStatusText').innerText = "فشل التحقق الجغرافي.";
                 }
-            }, () => { alert('يرجى تفعيل الـ GPS.'); });
+            }, () => { alert('يرجى تفعيل موقعك الجغرافي (GPS).'); });
         }
     </script>
 </body>
