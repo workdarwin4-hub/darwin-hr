@@ -17,7 +17,7 @@
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-blue-400" id="companyHeaderName">جاري تحميل اسم الشركة...</h1>
-                <p class="text-slate-400 text-sm mt-1">لوحة الإدارة الشاملة (أدمن وصاحب الشركة فقط)</p>
+                <p class="text-slate-400 text-sm mt-1">لوحة الإدارة وتحديد مواعيد البصمة ومتابعة الطلبات</p>
             </div>
             <div class="flex gap-3">
                 <button onclick="exportFullPayrollSheet()" class="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-xl text-sm font-bold shadow-lg">📊 تصدير شيت الرواتب المتكامل (Excel)</button>
@@ -25,6 +25,25 @@
                 <a href="index.html" class="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold">خروج</a>
             </div>
         </header>
+
+        <!-- قسم طلبات الموظفين المقدمة -->
+        <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl mb-8">
+            <h2 class="text-xl font-bold mb-4 text-amber-400">📬 طلبات الموظفين الجديدة (إجازات / تعديل بصمات / سلف)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400">
+                            <th class="p-3">صاحب الطلب</th>
+                            <th class="p-3">نوع الطلب</th>
+                            <th class="p-3">التفاصيل</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3">قرار الإدارة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTable"></tbody>
+                </table>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl">
@@ -40,36 +59,39 @@
             </div>
 
             <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 تسجيل موظف جديد وتحديد إجازته</h2>
+                <h2 class="text-lg font-bold mb-4 text-blue-300">👤 تسجيل موظف جديد ومواعيد البصمة</h2>
                 <div class="space-y-3">
                     <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm">
                     <input type="text" id="empPhone" placeholder="رقم الهاتف" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm">
                     <input type="number" id="empDailyRate" placeholder="أجر اليومية" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400">بداية البصمة المسموحة:</label>
+                            <input type="time" id="empStartTime" value="09:00" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">نهاية البصمة المسموحة:</label>
+                            <input type="time" id="empEndTime" value="17:00" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs">
+                        </div>
+                    </div>
                     <select id="empBranchSelect" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm"><option value="">اختر الفرع</option></select>
-                    <select id="empDayOff" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm">
-                        <option value="الجمعة">إجازة ثابتة: الجمعة</option>
-                        <option value="السبت">إجازة ثابتة: السبت</option>
-                        <option value="الأحد">إجازة ثابتة: الأحد</option>
-                        <option value="بدون">بدون إجازة ثابتة</option>
-                    </select>
                     <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-xl text-sm">تسجيل الموظف</button>
                 </div>
             </div>
         </div>
 
         <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-xl mb-8">
-            <h2 class="text-xl font-bold mb-4">قائمة الموظفين والصلاحيات (ترقية مشرف Supervisor وإرسال الرواتب)</h2>
+            <h2 class="text-xl font-bold mb-4">قائمة الموظفين والصلاحيات</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
                         <tr class="border-b border-slate-700 text-slate-400">
                             <th class="p-3">HR ID</th>
                             <th class="p-3">الاسم</th>
+                            <th class="p-3">مواعيد البصمة المحددة</th>
                             <th class="p-3">الصلاحية</th>
-                            <th class="p-3">حضور / غياب</th>
-                            <th class="p-3">الخصومات</th>
-                            <th class="p-3">إرسال القبض للتطبيق</th>
-                            <th class="p-3">إجراءات (ترقية / إلغاء خصم)</th>
+                            <th class="p-3">إرسال القبض</th>
+                            <th class="p-3">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="employeesTable"></tbody>
@@ -123,8 +145,9 @@
             const name = document.getElementById('empName').value.trim();
             const phone = document.getElementById('empPhone').value.trim();
             const dailyRate = Number(document.getElementById('empDailyRate').value) || 0;
+            const startTime = document.getElementById('empStartTime').value;
+            const endTime = document.getElementById('empEndTime').value;
             const branchId = document.getElementById('empBranchSelect').value;
-            const dayOff = document.getElementById('empDayOff').value;
             
             if(!name || !phone || !branchId) { alert('أدخل البيانات الأساسية'); return; }
 
@@ -136,7 +159,7 @@
                 }
 
                 set(ref(database, `companiesData/${currentCompany}/employees/${nextId}`), {
-                    name, phone, dailyRate, branchId, dayOff, empId: nextId.toString(), role: 'employee', status: 'active', unlockDayOff: false, penalties: 0, finalNetPay: 0
+                    name, phone, dailyRate, startTime, endTime, branchId, empId: nextId.toString(), role: 'employee', status: 'active', penalties: 0, finalNetPay: 0
                 }).then(() => { alert('تم تسجيل الموظف برقم HR ID: ' + nextId); });
             });
         }
@@ -147,27 +170,18 @@
             if(snapshot.exists()) {
                 globalEmployees = snapshot.val();
                 Object.values(globalEmployees).forEach(emp => {
-                    let attendedDays = new Set();
-                    globalAttendance.forEach(log => {
-                        if(log.empId === emp.empId && log.type === 'دخول') attendedDays.add(log.time.split(',')[0]);
-                    });
-                    let daysCount = attendedDays.size;
-                    let absentDays = Math.max(0, 30 - daysCount);
-
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-700/50">
                             <td class="p-3 font-mono text-blue-400 font-bold">${emp.empId}</td>
                             <td class="p-3 font-bold">${emp.name}</td>
-                            <td class="p-3"><span class="px-2 py-1 rounded text-xs ${emp.role==='supervisor'?'bg-purple-900 text-purple-300':'bg-slate-700 text-slate-300'}">${emp.role==='supervisor'?'مشرف (Supervisor)':'موظف عدي'}</span></td>
-                            <td class="p-3 text-xs">حضور: <span class="text-emerald-400 font-bold">${daysCount}</span> | غياب: <span class="text-red-400 font-bold">${absentDays}</span></td>
-                            <td class="p-3 text-red-400 font-bold">${emp.penalties || 0} ج</td>
+                            <td class="p-3 text-xs text-amber-300">من ${emp.startTime || '09:00'} إلى ${emp.endTime || '17:00'}</td>
+                            <td class="p-3"><span class="px-2 py-1 rounded text-xs ${emp.role==='supervisor'?'bg-purple-900 text-purple-300':'bg-slate-700 text-slate-300'}">${emp.role==='supervisor'?'مشرف':'موظف'}</span></td>
                             <td class="p-3 flex gap-2">
-                                <input type="number" id="pay_${emp.empId}" placeholder="قيمة القبض" class="bg-slate-900 border border-slate-700 p-1 rounded w-20 text-xs" value="${emp.finalNetPay || ''}">
+                                <input type="number" id="pay_${emp.empId}" placeholder="القبض" class="bg-slate-900 border border-slate-700 p-1 rounded w-20 text-xs" value="${emp.finalNetPay || ''}">
                                 <button onclick="sendSalaryToEmployee('${emp.empId}')" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs font-bold">إرسال</button>
                             </td>
                             <td class="p-3 flex gap-2">
-                                <button onclick="toggleSupervisor('${emp.empId}', '${emp.role}')" class="px-2 py-1 rounded text-xs font-bold ${emp.role==='supervisor'?'bg-red-600':'bg-purple-600'}">${emp.role==='supervisor'?'إلغاء الإشراف':'ترقية مشرف'}</button>
-                                <button onclick="waivePenalty('${emp.empId}')" class="px-2 py-1 bg-amber-600 hover:bg-amber-700 rounded text-xs font-bold text-white">إلغاء خصم</button>
+                                <button onclick="toggleSupervisor('${emp.empId}', '${emp.role}')" class="px-2 py-1 rounded text-xs font-bold ${emp.role==='supervisor'?'bg-red-600':'bg-purple-600'}">${emp.role==='supervisor'?'إلغاء إشراف':'ترقية مشرف'}</button>
                             </td>
                         </tr>
                     `;
@@ -175,50 +189,56 @@
             }
         });
 
-        onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
-            globalAttendance = [];
+        // جلب ومتابعة طلبات الموظفين
+        onValue(ref(database, `companiesData/${currentCompany}/requests`), (snapshot) => {
+            const tbody = document.getElementById('requestsTable');
+            tbody.innerHTML = '';
             if(snapshot.exists()) {
-                snapshot.forEach(child => { globalAttendance.push(child.val()); });
+                snapshot.forEach(child => {
+                    const req = child.val();
+                    const reqKey = child.key;
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-700/50">
+                            <td class="p-3 font-bold">${req.empName} (${req.empId})</td>
+                            <td class="p-3 text-blue-300">${req.type}</td>
+                            <td class="p-3 text-xs">${req.details}</td>
+                            <td class="p-3"><span class="px-2 py-1 rounded text-xs ${req.status==='مقبول'?'bg-emerald-900 text-emerald-300':req.status==='مرفوض'?'bg-red-900 text-red-300':'bg-amber-900 text-amber-300'}">${req.status || 'قيد المراجعة'}</span></td>
+                            <td class="p-3 flex gap-2">
+                                <button onclick="updateRequest('${reqKey}', 'مقبول')" class="px-2 py-1 bg-emerald-600 rounded text-xs font-bold">قبول</button>
+                                <button onclick="updateRequest('${reqKey}', 'مرفوض')" class="px-2 py-1 bg-red-600 rounded text-xs font-bold">رفض</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات جديدة حالياً.</td></tr>';
             }
         });
 
+        window.updateRequest = function(key, status) {
+            update(ref(database, `companiesData/${currentCompany}/requests/${key}`), { status }).then(() => alert('تم تحديث حال الطلب'));
+        }
+
         window.toggleSupervisor = function(empId, currentRole) {
             const newRole = currentRole === 'supervisor' ? 'employee' : 'supervisor';
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role: newRole }).then(() => {
-                alert('تم تحديث صلاحية المشرف بنجاح!');
-            });
+            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role: newRole }).then(() => alert('تم تحديث الصلاحية بنجاح!'));
         }
 
         window.sendSalaryToEmployee = function(empId) {
             const amount = Number(document.getElementById(`pay_${empId}`).value) || 0;
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { finalNetPay: amount }).then(() => {
-                alert('تم إرسال صافي القبض لموبايل الموظف بنجاح!');
-            });
-        }
-
-        window.waivePenalty = function(empId) {
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { penalties: 0 }).then(() => {
-                alert('تم رفع وإلغاء الخصم عن الموظف بنجاح!');
-            });
+            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { finalNetPay: amount }).then(() => alert('تم إرسال القبض للتطبيق!'));
         }
 
         window.exportFullPayrollSheet = function() {
-            let csvContent = "\uFEFFHR ID,اسم الموظف,أجر اليومية,أيام الحضور,أيام الغياب,الخصومات,صافي القبض المستحق\n";
+            let csvContent = "\uFEFFHR ID,اسم الموظف,أجر اليومية,القبض الصافي\n";
             Object.values(globalEmployees).forEach(emp => {
-                let attendedDays = new Set();
-                globalAttendance.forEach(log => {
-                    if(log.empId === emp.empId && log.type === 'دخول') attendedDays.add(log.time.split(',')[0]);
-                });
-                let daysCount = attendedDays.size;
-                let absentDays = Math.max(0, 30 - daysCount);
-                let totalNet = (daysCount * (emp.dailyRate || 0)) - (emp.penalties || 0);
-                csvContent += `${emp.empId},"${emp.name}",${emp.dailyRate || 0},${daysCount},${absentDays},${emp.penalties || 0},${totalNet}\n`;
+                csvContent += `${emp.empId},"${emp.name}",${emp.dailyRate || 0},${emp.finalNetPay || 0}\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', `Full_Payroll_${currentCompany}.csv`);
+            a.setAttribute('download', `Payroll_${currentCompany}.csv`);
             a.click();
         }
     </script>
