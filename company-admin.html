@@ -14,35 +14,34 @@
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-3xl font-bold text-blue-400" id="companyHeaderName">DARWIN HR - إدارة الشركة</h1>
-                <p class="text-slate-400 text-sm mt-1">إدارة الفروع، ترقية المشرفين، سجلات البصمات، وتصدير التقارير</p>
+                <p class="text-slate-400 text-sm mt-1">توليد أكواد الموظفين، الفروع، وسجلات البصمات</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="exportAttendanceToExcel()" class="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-xl text-sm font-bold shadow-lg">📊 تصدير تقارير Excel</button>
-                <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-bold shadow-lg">تطبيق الموظفين</a>
+                <button onclick="exportAttendanceToExcel()" class="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-xl text-sm font-bold">📊 تقارير Excel</button>
+                <a href="employee.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-bold">تطبيق الموظفين</a>
                 <a href="index.html" class="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold">خروج</a>
             </div>
         </header>
 
-        <!-- إدارة الفروع والموظفين للشركة فقط -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <h2 class="text-lg font-bold text-blue-400">🏢 إعداد الفروع ومواقع العمل (GPS)</h2>
-                <input type="text" id="branchName" placeholder="اسم الفرع أو المقر" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                <input type="text" id="branchName" placeholder="اسم الفرع" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="branchLat" placeholder="خط العرض (Lat)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
-                    <input type="text" id="branchLng" placeholder="خط الطول (Lng)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                    <input type="text" id="branchLat" placeholder="Lat" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                    <input type="text" id="branchLng" placeholder="Lng" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 </div>
-                <button onclick="fetchCurrentLocation()" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2 rounded-xl text-xs">📍 جلب موقعي الحالي</button>
+                <button onclick="fetchCurrentLocation()" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2 rounded-xl text-xs">📍 جلب موقعي</button>
                 <button onclick="addBranch()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2 rounded-xl text-sm">حفظ الفرع</button>
             </div>
 
             <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
                 <h2 class="text-lg font-bold text-blue-400">👤 تسجيل موظف جديد</h2>
-                <input type="text" id="empName" placeholder="اسم الموظف الثلاثي" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                <input type="text" id="empName" placeholder="اسم الموظف" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 <input type="text" id="empPhone" placeholder="رقم الهاتف" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="empNationalId" placeholder="الرقم القومي (14 رقم)" maxlength="14" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
-                    <input type="text" id="empManagerId" placeholder="كود المدير المباشر (HR ID)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                    <input type="text" id="empNationalId" placeholder="الرقم القومي" maxlength="14" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+                    <input type="text" id="empManagerId" placeholder="كود المدير (HR ID)" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
                 </div>
                 <select id="empBranchSelect" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm"><option value="">اختر الفرع</option></select>
                 <button onclick="addEmployee()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-2 rounded-xl text-sm">حفظ الموظف</button>
@@ -50,87 +49,52 @@
         </div>
 
         <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-amber-400">⚡ قائمة الموظفين (مع الترقية وسجلات البصمات)</h2>
+            <h2 class="text-xl font-bold text-amber-400">⚡ جدول الموظفين وأكواد دخولهم التلقائية</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
                         <tr class="border-b border-slate-800 text-slate-400">
-                            <th class="p-3">صورة البروفايل</th>
-                            <th class="p-3">HR ID والاسم</th>
-                            <th class="p-3">القومي والمدير</th>
-                            <th class="p-3">الراتب الصافي</th>
-                            <th class="p-3">الإجراءات والترقية والسجلات</th>
+                            <th class="p-3">صورة</th>
+                            <th class="p-3">كود الدخول التلقائي للموظف</th>
+                            <th class="p-3">الاسم والبيانات</th>
+                            <th class="p-3">الراتب</th>
+                            <th class="p-3">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="employeesControlTable"></tbody>
                 </table>
             </div>
         </div>
-
-        <!-- نافذة سجلات الموظف المنفصلة -->
-        <div id="empLogsModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-3xl max-h-[80vh] overflow-y-auto space-y-4 text-right shadow-2xl">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <h3 id="modalEmpTitle" class="text-lg font-bold text-blue-400">سجل بصمات الموظف</h3>
-                    <button onclick="closeEmpLogsModal()" class="text-slate-400 font-bold hover:text-white">✕ إغلاق</button>
-                </div>
-                <div id="modalEmpLogsContainer" class="space-y-3">
-                    <p class="text-slate-500 text-xs">جاري التحميل...</p>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script type="module">
         import { database, ref, set, get, onValue, update, remove } from "./firebase-config.js";
         const currentCompany = localStorage.getItem('darwin_current_company') || 'main_company';
+        let companyPrefix = "cmp";
 
         get(ref(database, `companies/${currentCompany}`)).then(snap => {
-            if(snap.exists()) document.getElementById('companyHeaderName').innerText = "شركة: " + snap.val().name;
+            if(snap.exists()) {
+                const compName = snap.val().name;
+                document.getElementById('companyHeaderName').innerText = "شركة: " + compName;
+                companyPrefix = currentCompany.replace('COMP-', '').substring(0, 3).toLowerCase();
+            }
         });
 
-        window.exportAttendanceToExcel = function() {
-            get(ref(database, `companiesData/${currentCompany}/attendance`)).then((snapshot) => {
-                if(!snapshot.exists()) {
-                    alert('لا توجد سجلات بصمة لتصديرها!');
-                    return;
-                }
-
-                let csvContent = "\uFEFFHR ID,اسم الموظف,نوع البصمة (دخول/خروج),الوقت والتاريخ,الموقع (GPS)\n";
-                snapshot.forEach(child => {
-                    const log = child.val();
-                    const punchType = log.type || 'دخول';
-                    csvContent += `"${log.empId}","${log.name}","${punchType}","${log.time}","${log.location || 'غير متوفر'}"\n`;
-                });
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `DarwinHR_Attendance_${currentCompany}_${new Date().toLocaleDateString()}.csv`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-
         window.fetchCurrentLocation = function() {
-            if(!navigator.geolocation) { alert('المتصفح لا يدعم تحديد الموقع'); return; }
+            if(!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition((pos) => {
                 document.getElementById('branchLat').value = pos.coords.latitude;
                 document.getElementById('branchLng').value = pos.coords.longitude;
-                alert('تم جلب إحداثيات الفرع بنجاح!');
-            }, () => { alert('فشل تحديد الموقع.'); });
+            });
         }
 
         window.addBranch = function() {
             const name = document.getElementById('branchName').value.trim();
             const lat = document.getElementById('branchLat').value.trim();
             const lng = document.getElementById('branchLng').value.trim();
-            if(!name || !lat || !lng) { alert('أدخل بيانات الفرع كاملة'); return; }
+            if(!name || !lat || !lng) return;
             const branchId = 'BR-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-            set(ref(database, `companiesData/${currentCompany}/branches/${branchId}`), { branchId, name, lat, lng }).then(() => alert('تم حفظ الفرع بنجاح!'));
+            set(ref(database, `companiesData/${currentCompany}/branches/${branchId}`), { branchId, name, lat, lng }).then(() => alert('تم حفظ الفرع!'));
         }
 
         onValue(ref(database, `companiesData/${currentCompany}/branches`), (snapshot) => {
@@ -151,7 +115,7 @@
             const managerId = document.getElementById('empManagerId').value.trim();
             const branchId = document.getElementById('empBranchSelect').value;
             
-            if(!name || !phone || !nationalId || !branchId) { alert('أدخل كافة بيانات الموظف الأساسية'); return; }
+            if(!name || !phone || !branchId) { alert('أدخل بيانات الموظف الأساسية'); return; }
 
             get(ref(database, `companiesData/${currentCompany}/employees`)).then((snapshot) => {
                 let nextId = 1000;
@@ -162,8 +126,11 @@
 
                 set(ref(database, `companiesData/${currentCompany}/employees/${nextId}`), {
                     name, phone, nationalId, managerId: managerId || '', branchId, empId: nextId.toString(),
-                    role: 'employee', status: 'active', annualLeave: 2, emergencyLeave: 2, finalNetPay: 0, profileImg: 'https://via.placeholder.com/60'
-                }).then(() => { alert('تم تسجيل الموظف برقم HR ID: ' + nextId); });
+                    role: 'employee', status: 'active', finalNetPay: 0, profileImg: 'https://via.placeholder.com/60'
+                }).then(() => {
+                    const generatedCode = (companyPrefix + nextId).toUpperCase();
+                    alert('تم تسجيل الموظف بنجاح!\n🔑 كود دخوله الموحد للتطبيق: ' + generatedCode);
+                });
             });
         }
 
@@ -173,23 +140,21 @@
             if(snapshot.exists()) {
                 const emps = snapshot.val();
                 Object.values(emps).forEach(emp => {
+                    const unifiedLoginCode = (companyPrefix + emp.empId).toUpperCase();
                     const isSupervisor = emp.role === 'supervisor';
+
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-800/60">
-                            <td class="p-3"><img src="${emp.profileImg || 'https://via.placeholder.com/60'}" class="w-12 h-12 rounded-full object-cover border border-slate-700"></td>
-                            <td class="p-3 font-bold">
-                                <span class="text-blue-400 font-mono">[${emp.empId}]</span> ${emp.name}
-                                <br><span class="text-[10px] px-2 py-0.5 rounded font-bold ${isSupervisor ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'}">${isSupervisor ? 'مشرف (Supervisor)' : 'موظف عادي'}</span>
-                            </td>
-                            <td class="p-3 text-xs">القومي: <span class="font-mono text-amber-300">${emp.nationalId || '---'}</span><br>المدير: <span class="font-mono text-purple-300">${emp.managerId || '---'}</span></td>
+                            <td class="p-3"><img src="${emp.profileImg || 'https://via.placeholder.com/60'}" class="w-10 h-10 rounded-full object-cover"></td>
+                            <td class="p-3 font-mono font-bold text-amber-400 text-base">${unifiedLoginCode}</td>
+                            <td class="p-3 font-bold">${emp.name}<br><span class="text-xs text-slate-400">${emp.phone}</span></td>
                             <td class="p-3 text-xs">
-                                الراتب: <input type="number" id="pay_${emp.empId}" value="${emp.finalNetPay || 0}" class="w-20 bg-slate-950 border border-slate-800 p-1 rounded text-xs">
+                                <input type="number" id="pay_${emp.empId}" value="${emp.finalNetPay || 0}" class="w-20 bg-slate-955 border border-slate-800 p-1 rounded text-xs">
                                 <button onclick="updatePay('${emp.empId}')" class="bg-emerald-600 px-2 py-1 rounded text-[10px] mt-1 block">اعتماد</button>
                             </td>
                             <td class="p-3 space-y-1">
-                                <button onclick="openEmpLogs('${emp.empId}', '${emp.name}')" class="bg-indigo-600 hover:bg-indigo-700 px-2 py-1 rounded text-xs font-bold block w-full">📂 سجل البصمات</button>
-                                <button onclick="toggleRole('${emp.empId}', '${emp.role}')" class="px-2 py-1 rounded text-xs font-bold block w-full ${isSupervisor ? 'bg-amber-600 hover:bg-amber-700' : 'bg-purple-600 hover:bg-purple-700'}">${isSupervisor ? 'إلغاء الإشراف' : '⭐ ترقية مشرف'}</button>
-                                <button onclick="deleteEmployee('${emp.empId}')" class="px-2 py-1 rounded text-xs font-bold bg-red-600 hover:bg-red-700 block w-full">حذف</button>
+                                <button onclick="toggleRole('${emp.empId}', '${emp.role}')" class="px-2 py-1 rounded text-xs font-bold block w-full ${isSupervisor ? 'bg-amber-600' : 'bg-purple-600'}">${isSupervisor ? 'إلغاء الإشراف' : '⭐ ترقية مشرف'}</button>
+                                <button onclick="deleteEmployee('${emp.empId}')" class="bg-red-600 px-2 py-1 rounded text-xs font-bold block w-full">حذف</button>
                             </td>
                         </tr>
                     `;
@@ -197,68 +162,9 @@
             }
         });
 
-        // ميزة ترقية الموظف إلى مشرف أو إزالة الإشراف
         window.toggleRole = function(empId, currentRole) {
             const newRole = (currentRole === 'supervisor') ? 'employee' : 'supervisor';
-            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role: newRole }).then(() => {
-                alert(newRole === 'supervisor' ? '⭐ تم ترقية الموظف إلى مشرف (Supervisor) بنجاح!' : 'تم إلغاء الإشراف وتحويله لموظف عادي.');
-            }).catch(err => { alert('فشل التعديل: ' + err.message); });
-        }
-
-        window.openEmpLogs = function(empId, empName) {
-            document.getElementById('modalEmpTitle').innerText = `سجل بصمات الموظف: ${empName} (HR ID: ${empId})`;
-            document.getElementById('empLogsModal').classList.remove('hidden');
-
-            onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
-                const container = document.getElementById('modalEmpLogsContainer');
-                container.innerHTML = '';
-                let found = false;
-
-                if(snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const log = child.val();
-                        const key = child.key;
-                        if(log.empId === empId) {
-                            found = true;
-                            const punchType = log.type || 'دخول';
-                            container.innerHTML += `
-                                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
-                                    <div class="flex items-center gap-3">
-                                        ${log.faceImage ? `<img src="${log.faceImage}" class="w-12 h-12 object-cover rounded-xl border border-slate-700">` : ''}
-                                        <div>
-                                            <p class="font-bold text-blue-400">الحالة: ${punchType}</p>
-                                            <p class="text-slate-300 mt-1">الوقت: <input type="text" id="time_${key}" value="${log.time || ''}" class="bg-slate-900 border border-slate-800 p-1 rounded text-xs w-40"></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <button onclick="updateAttendanceTime('${key}')" class="bg-indigo-600 px-3 py-1 rounded font-bold">تعديل الوقت</button>
-                                        <button onclick="deleteAttendance('${key}')" class="bg-red-600 px-3 py-1 rounded font-bold">حذف</button>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-                if(!found) container.innerHTML = '<p class="text-center text-xs text-slate-500 py-6">لا توجد سجلات.</p>';
-            });
-        }
-
-        window.closeEmpLogsModal = function() { document.getElementById('empLogsModal').classList.add('hidden'); }
-        
-        window.updateAttendanceTime = function(key) {
-            const newTime = document.getElementById(`time_${key}`).value.trim();
-            if(!newTime) { alert('أدخل الوقت الجديد'); return; }
-            update(ref(database, `companiesData/${currentCompany}/attendance/${key}`), { time: newTime }).then(() => {
-                alert('تم تعديل وتحديث وقت البصمة بنجاح!');
-            }).catch(err => { alert('فشل التعديل: ' + err.message); });
-        }
-
-        window.deleteAttendance = function(key) {
-            if(confirm('حذف البصمة؟')) {
-                remove(ref(database, `companiesData/${currentCompany}/attendance/${key}`)).then(() => {
-                    alert('تم حذف البصمة بنجاح!');
-                });
-            }
+            update(ref(database, `companiesData/${currentCompany}/employees/${empId}`), { role: newRole }).then(() => alert('تم تعديل الصلاحية!'));
         }
 
         window.updatePay = function(empId) {
@@ -268,6 +174,23 @@
 
         window.deleteEmployee = function(empId) {
             if(confirm('حذف الموظف؟')) remove(ref(database, `companiesData/${currentCompany}/employees/${empId}`)).then(() => alert('تم الحذف!'));
+        }
+
+        window.exportAttendanceToExcel = function() {
+            get(ref(database, `companiesData/${currentCompany}/attendance`)).then((snapshot) => {
+                if(!snapshot.exists()) { alert('لا توجد سجلات!'); return; }
+                let csv = "\uFEFFHR ID,اسم الموظف,الحالة,الوقت,الموقع\n";
+                snapshot.forEach(c => {
+                    const l = c.val();
+                    csv += `"${l.empId}","${l.name}","${l.type || 'دخول'}","${l.time}","${l.location || ''}"\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Attendance_${currentCompany}.csv`;
+                a.click();
+            });
         }
     </script>
 </body>
