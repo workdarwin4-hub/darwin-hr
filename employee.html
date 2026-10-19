@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - تطبيق الموظف الذكي</title>
+    <title>DARWIN HR - تطبيق الموظف</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="loginScreen" class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-800 text-center">
         <h1 class="text-2xl font-bold text-blue-400 mb-2">تسجيل دخول الموظف</h1>
         <p class="text-xs text-slate-400 mb-6">أدخل رقم هاتفك وكود الـ HR ID</p>
         <div class="space-y-4">
-            <input type="text" id="loginPhone" placeholder="رقم الهاتف المسجل" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl text-center text-sm focus:outline-none">
-            <input type="text" id="loginHrId" placeholder="كود الـ HR ID (مثال: 1000)" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl text-center text-sm focus:outline-none">
+            <input type="text" id="loginPhone" placeholder="رقم الهاتف" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl text-center text-sm focus:outline-none">
+            <input type="text" id="loginHrId" placeholder="كود الـ HR ID" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl text-center text-sm focus:outline-none">
             <button onclick="empLogin()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl shadow-lg transition">دخول للنظام</button>
         </div>
     </div>
 
-    <!-- لوحة الموظف الرئيسية -->
-    <div id="dashboardScreen" class="hidden w-full max-w-md bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col justify-between min-h-[650px] p-5">
+    <div id="dashboardScreen" class="hidden w-full max-w-md bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col justify-between min-h-[680px] p-5">
         <div>
-            <!-- الهيدر الشخصي -->
             <div class="flex items-center justify-between mb-4 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50">
                 <div class="text-right">
                     <h2 id="profileName" class="font-bold text-base text-white"></h2>
@@ -33,33 +30,16 @@
                 <img id="profileImg" src="https://via.placeholder.com/60" class="w-12 h-12 rounded-full object-cover border-2 border-blue-500">
             </div>
 
-            <!-- بطاقة حساب القبض التلقائي باليومية -->
-            <div class="bg-gradient-to-r from-blue-900/60 to-emerald-900/60 p-4 rounded-2xl border border-blue-500/30 mb-4 text-center shadow-lg">
-                <p class="text-xs text-slate-300">إجمالي المستحق بناءً على أيام الحضور</p>
-                <h3 id="netSalaryDisplay" class="text-2xl font-bold text-emerald-400 mt-1">0 جنية</h3>
-                <p class="text-[10px] text-slate-400 mt-1">أيام الحضور: <span id="daysCountDisplay" class="font-bold text-white">0</span> يوم | أجر اليوم: <span id="dailyRateDisplay" class="font-bold text-amber-400">0</span> ج</p>
-            </div>
+            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700 text-center space-y-3">
+                <div id="punchStatusText" class="text-xs font-bold text-blue-300">جارٍ التحقق من البصمة واليوم...</div>
 
-            <!-- شريط الأيام -->
-            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 mb-4 text-center">
-                <span id="currentMonthYear" class="text-xs font-bold text-slate-300"></span>
-                <div id="daysBar" class="flex justify-around items-center pt-2 border-t border-slate-700/60 text-xs mt-2"></div>
-            </div>
-
-            <!-- صندوق البصمة -->
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center space-y-3">
-                <div class="flex justify-center gap-2">
-                    <button onclick="setPunchType('دخول')" id="typeInBtn" class="flex-1 py-2 rounded-xl font-bold bg-blue-600 text-white text-xs">دخول</button>
-                    <button onclick="setPunchType('خروج')" id="typeOutBtn" class="flex-1 py-2 rounded-xl font-bold bg-slate-900 text-slate-400 text-xs">خروج</button>
-                </div>
-
-                <div id="cameraContainer" class="relative rounded-xl overflow-hidden border border-slate-700 bg-black hidden">
+                <div id="cameraContainer" class="relative rounded-2xl overflow-hidden border border-slate-700 bg-black hidden">
                     <video id="videoElement" autoplay playsinline class="w-full h-40 object-cover"></video>
                     <canvas id="canvasElement" class="hidden"></canvas>
                 </div>
 
-                <button id="punchActionBtn" onclick="startPunchProcess()" class="w-full bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-xl shadow-lg text-xs">
-                    📸 فتح الكاميرا وبصم الوجه
+                <button id="punchActionBtn" onclick="startPunchProcess()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl shadow-lg text-xs transition">
+                    📸 بصمة دخول (بالوجه فقط)
                 </button>
             </div>
         </div>
@@ -76,14 +56,14 @@
 
         let currentEmp = null;
         let empBranch = null;
-        let selectedPunchType = 'دخول';
         let videoStream = null;
+        let currentPunchState = 'دخول';
+        let isDayOffBlocked = false;
 
         window.onload = function() {
             const savedHrId = localStorage.getItem('darwin_emp_hrid');
             const savedPhone = localStorage.getItem('darwin_emp_phone');
             if(savedHrId && savedPhone) verifyAndLoadUser(savedHrId, savedPhone);
-            renderDaysBar();
         }
 
         window.empLogin = function() {
@@ -104,19 +84,27 @@
                             localStorage.setItem('darwin_emp_phone', phone);
                         }
 
+                        const todayDayName = new Date().toLocaleDateString('ar-EG', { weekday: 'long' });
+                        if(emp.dayOff === todayDayName && !emp.unlockDayOff) {
+                            isDayOffBlocked = true;
+                        }
+
                         get(ref(database, `companiesData/${currentCompany}/branches/${emp.branchId}`)).then((bSnap) => {
-                            if(bSnap.exists()) {
-                                empBranch = bSnap.val();
-                                document.getElementById('profileBranch').innerText = empBranch.name;
-                            }
+                            if(bSnap.exists()) empBranch = bSnap.val();
+                            document.getElementById('profileBranch').innerText = empBranch ? empBranch.name : 'فرع عام';
                             document.getElementById('profileName').innerText = emp.name;
                             document.getElementById('profileImg').src = emp.profileImg || 'https://via.placeholder.com/60';
-                            document.getElementById('dailyRateDisplay').innerText = emp.dailyRate || 0;
                             
                             document.getElementById('loginScreen').classList.add('hidden');
                             document.getElementById('dashboardScreen').classList.remove('hidden');
                             
-                            calculateEmployeeSalaryAndAttendance(emp.empId, emp.dailyRate || 0);
+                            if(isDayOffBlocked) {
+                                document.getElementById('punchStatusText').innerText = `⚠️ اليوم هو إجازتك الأسبوعية (${emp.dayOff}). البصمة مغلقة إلا بإذن الأدمن.`;
+                                document.getElementById('punchActionBtn').disabled = true;
+                                document.getElementById('punchActionBtn').className = "w-full bg-slate-700 font-bold py-3 rounded-xl text-xs text-slate-400 cursor-not-allowed";
+                            } else {
+                                checkTodayAttendanceStatus(emp.empId);
+                            }
                         });
                     } else {
                         alert('بيانات غير صحيحة أو الحساب موقوف.');
@@ -129,22 +117,41 @@
             });
         }
 
-        function calculateEmployeeSalaryAndAttendance(empId, dailyRate) {
+        function checkTodayAttendanceStatus(empId) {
+            const todayStr = new Date().toLocaleDateString();
             onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
-                let attendedDays = new Set();
+                let hasIn = false;
+                let hasOut = false;
+
                 if(snapshot.exists()) {
                     snapshot.forEach(child => {
                         let log = child.val();
-                        if(log.empId === empId && log.type === 'دخول') {
-                            attendedDays.add(log.time.split(',')[0]);
+                        if(log.empId === empId && log.time.includes(todayStr)) {
+                            if(log.type === 'دخول') hasIn = true;
+                            if(log.type === 'خروج') hasOut = true;
                         }
                     });
                 }
-                let totalDays = attendedDays.size;
-                let totalNet = totalDays * dailyRate;
 
-                document.getElementById('daysCountDisplay').innerText = totalDays;
-                document.getElementById('netSalaryDisplay').innerText = totalNet + " جنية";
+                const btn = document.getElementById('punchActionBtn');
+                const statusText = document.getElementById('punchStatusText');
+
+                if(!hasIn) {
+                    currentPunchState = 'دخول';
+                    statusText.innerText = "الرجاء تسجيل بصمة (الدخول)";
+                    btn.innerText = "📸 بصمة دخول (بالوجه فقط)";
+                } else if(hasIn && !hasOut) {
+                    currentPunchState = 'خروج';
+                    statusText.innerText = "تم تسجيل الدخول. يمكنك تسجيل (الخروج) نهاية الشفت";
+                    btn.innerText = "📸 بصمة خروج (بالوجه فقط)";
+                    btn.className = "w-full bg-amber-600 hover:bg-amber-700 font-bold py-3 rounded-xl shadow-lg text-xs transition";
+                } else {
+                    currentPunchState = 'مكتمل';
+                    statusText.innerText = "✅ لقد أكملت بصمتي اليوم بنجاح.";
+                    btn.innerText = "تم تسجيل بصمات اليوم";
+                    btn.disabled = true;
+                    btn.className = "w-full bg-slate-700 font-bold py-3 rounded-xl text-xs text-slate-400 cursor-not-allowed";
+                }
             });
         }
 
@@ -154,41 +161,13 @@
             location.reload();
         }
 
-        window.setPunchType = function(type) {
-            selectedPunchType = type;
-            if(type === 'دخول') {
-                document.getElementById('typeInBtn').className = "flex-1 py-2 rounded-xl font-bold bg-blue-600 text-white text-xs";
-                document.getElementById('typeOutBtn').className = "flex-1 py-2 rounded-xl font-bold bg-slate-900 text-slate-400 text-xs";
-            } else {
-                document.getElementById('typeOutBtn').className = "flex-1 py-2 rounded-xl font-bold bg-blue-600 text-white text-xs";
-                document.getElementById('typeInBtn').className = "flex-1 py-2 rounded-xl font-bold bg-slate-900 text-slate-400 text-xs";
-            }
-        }
-
-        function renderDaysBar() {
-            const daysBar = document.getElementById('daysBar');
-            const now = new Date();
-            document.getElementById('currentMonthYear').innerText = now.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' });
-            daysBar.innerHTML = '';
-            for(let i = -3; i <= 3; i++) {
-                let d = new Date();
-                d.setDate(now.getDate() + i);
-                let isToday = (i === 0);
-                daysBar.innerHTML += `
-                    <div class="flex flex-col items-center p-2 rounded-xl ${isToday ? 'bg-blue-600 text-white font-bold shadow-lg scale-105' : 'text-slate-400 opacity-60'}">
-                        <span>${d.getDate()}</span>
-                        <span class="text-[9px] mt-1">${d.toLocaleDateString('ar-EG', { weekday: 'short' })}</span>
-                    </div>
-                `;
-            }
-        }
-
         window.startPunchProcess = function() {
+            if(currentPunchState === 'مكتمل' || isDayOffBlocked) return;
             document.getElementById('cameraContainer').classList.remove('hidden');
             navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
                 videoStream = stream;
                 document.getElementById('videoElement').srcObject = stream;
-                document.getElementById('punchActionBtn').innerText = "📸 التقاط الوجه وتسجيل البصمة";
+                document.getElementById('punchActionBtn').innerText = `📸 التقاط الوجه وتسجيل (${currentPunchState})`;
                 document.getElementById('punchActionBtn').setAttribute('onclick', 'executePunch()');
             }).catch(() => { alert('فشل تشغيل كاميرا الهاتف.'); });
         }
@@ -205,7 +184,7 @@
                 if(distance < 0.05) {
                     const video = document.getElementById('videoElement');
                     const canvas = document.getElementById('canvasElement');
-                    if(video.videoWidth === 0) { alert("انتظر حتى تفتح الكاميرا تماماً."); return; }
+                    if(video.videoWidth === 0) { alert("انتظر حتى تفتح الكاميرا."); return; }
 
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -213,38 +192,21 @@
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const faceImage = canvas.toDataURL('image/png');
 
-                    const todayStr = new Date().toLocaleDateString();
-                    get(ref(database, `companiesData/${currentCompany}/attendance`)).then((attSnap) => {
-                        let alreadyPunchedToday = false;
-                        if(attSnap.exists()) {
-                            attSnap.forEach(ch => {
-                                let log = ch.val();
-                                if(log.empId === currentEmp.empId && log.time.includes(todayStr) && log.type === selectedPunchType) {
-                                    alreadyPunchedToday = true;
-                                }
-                            });
-                        }
-
-                        if(alreadyPunchedToday) {
-                            alert(`لقد سجلت (${selectedPunchType}) مسبقاً اليوم (${todayStr})!`);
-                            return;
-                        }
-
-                        push(ref(database, `companiesData/${currentCompany}/attendance`), {
-                            empId: currentEmp.empId,
-                            name: currentEmp.name,
-                            branch: empBranch.name,
-                            type: selectedPunchType,
-                            time: new Date().toLocaleString(),
-                            faceImage: faceImage
-                        }).then(() => {
-                            alert(`تم تسجيل ${selectedPunchType} بنجاح وبصمة الوجه معتمدة!`);
-                            if(videoStream) videoStream.getTracks().forEach(t => t.stop());
-                            location.reload();
-                        });
+                    push(ref(database, `companiesData/${currentCompany}/attendance`), {
+                        empId: currentEmp.empId,
+                        name: currentEmp.name,
+                        branch: empBranch.name,
+                        type: currentPunchState,
+                        time: new Date().toLocaleString(),
+                        faceImage: faceImage
+                    }).then(() => {
+                        alert(`تم تسجيل (${currentPunchState}) بنجاح وبصمة الوجه معتمدة!`);
+                        if(videoStream) videoStream.getTracks().forEach(t => t.stop());
+                        location.reload();
                     });
+
                 } else {
-                    alert(`أنت خارج النطاق الجغرافي لفرعك (${empBranch.name})!`);
+                    alert(`أنت خارج نطاق فرعك (${empBranch.name})!`);
                 }
             }, () => { alert('يرجى تفعيل موقعك الجغرافي (GPS).'); });
         }
