@@ -40,20 +40,20 @@
                     <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 shadow-sm cursor-pointer" onclick="switchTab('menu')">🔔</div>
                 </div>
 
-                <!-- شريط الأيام الأفقي -->
+                <!-- شريط الأيام الأفقي (متفاعل ويقلب اليوم فعلاً) -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
                     <div class="flex justify-between items-center mb-2 px-1">
-                        <span class="text-xs font-bold text-slate-400">📅 تاريخ الجدول (أكتوبر 2026)</span>
+                        <span id="selectedDateHeader" class="text-xs font-bold text-blue-600">📅 عرض جدول اليوم: اليوم</span>
                     </div>
                     <div id="daysBar" class="flex justify-around items-center text-xs"></div>
                 </div>
 
-                <!-- بطاقة تسجيل الحضور والانصراف والـ GPS -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm text-center space-y-3">
+                <!-- بطاقة حالة اليوم المعروض -->
+                <div id="dayDetailsCard" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm text-center space-y-3">
                     <div class="text-right flex justify-between items-center">
                         <div>
                             <p class="text-xs font-bold text-slate-800">Mid Mile: From 4 PM - 12 AM</p>
-                            <p id="shiftTimesText" class="text-[11px] text-slate-400 mt-0.5">موعد تسجيل الحضور - 04:00 م</p>
+                            <p id="selectedDayTitle" class="text-[11px] text-slate-400 mt-0.5">حالة الشفت لهذا اليوم</p>
                         </div>
                         <div id="workTimerDisplay" class="text-xs font-mono font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl">00:00:00</div>
                     </div>
@@ -85,23 +85,16 @@
                 </div>
             </div>
 
-            <!-- 2. شاشة لوحة المعلومات (Dashboard) -->
+            <!-- 2. لوحة المعلومات -->
             <div id="tabContent-dashboard" class="hidden space-y-4">
                 <h2 class="text-lg font-bold text-slate-900 text-right">لوحة المعلومات</h2>
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                    <p class="text-xs font-bold text-slate-500 text-right">الرصيد</p>
-                    <div class="grid grid-cols-2 gap-3 text-center">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="text-lg font-bold text-blue-600">2</span><p class="text-[10px] text-slate-400">سنوية</p></div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="text-lg font-bold text-blue-600">2</span><p class="text-[10px] text-slate-400">طارئة</p></div>
-                    </div>
-                </div>
                 <div class="bg-blue-600 text-white p-4 rounded-2xl text-center shadow-md">
                     <h3 class="text-2xl font-bold">186.87</h3>
                     <p class="text-[11px] text-blue-100 mt-0.5">ساعات العمل هذا الشهر</p>
                 </div>
             </div>
 
-            <!-- 3. شاشة طلباتي (Requests) -->
+            <!-- 3. طلباتي -->
             <div id="tabContent-requests" class="hidden space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-bold text-slate-900">طلباتي</h2>
@@ -110,21 +103,17 @@
                 <div id="requestsListContainer" class="space-y-3"></div>
             </div>
 
-            <!-- 4. شاشة القائمة والملف الشخصي بالرقم القومي -->
+            <!-- 4. القائمة والملف الشخصي (يظهر المدير المباشر والرقم القومي) -->
             <div id="tabContent-menu" class="hidden space-y-4 text-right">
                 <h2 class="text-lg font-bold text-slate-900">الملف الشخصي والقائمة</h2>
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2 text-xs">
                     <p class="font-bold text-blue-600">معلومات الملف الشخصي:</p>
                     <p>كود الموظف (HR ID): <span id="infoEmpId" class="font-mono font-bold">---</span></p>
                     <p>الرقم القومي: <span id="infoNationalId" class="font-mono font-bold text-amber-600">---</span></p>
+                    <p>المدير المباشر (HR ID): <span id="infoManagerId" class="font-mono font-bold text-purple-600">---</span></p>
                     <p>تاريخ الالتحاق: <span class="font-mono">2026-05-07</span></p>
-                    <p>المدير المباشر: <span class="font-bold">Mohamed Ashraf</span></p>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                    <span class="text-xl">💰</span>
-                    <h4 class="font-bold text-xs mt-2 text-slate-800">صافي القبض المعتمد: <span id="menuPayDisplay" class="text-emerald-600 font-bold">قيد المراجعة</span></h4>
-                </div>
-                <button onclick="empLogout()" class="w-full bg-red-50 text-red-600 font-bold py-3 rounded-2xl text-xs mt-4">تسجيل الخروج من الحساب</button>
+                <button onclick="empLogout()" class="w-full bg-red-50 text-red-600 font-bold py-3 rounded-2xl text-xs mt-4">تسجيل الخروج</button>
             </div>
 
         </div>
@@ -139,7 +128,7 @@
         </div>
     </div>
 
-    <!-- نافذة تقديم طلب جديد -->
+    <!-- نافذة طلب جديد -->
     <div id="requestModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-3xl w-full max-w-sm space-y-4 text-right shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -159,7 +148,7 @@
                 </select>
             </div>
             <div>
-                <label class="text-xs text-slate-500 block mb-1">تعليقات / تفاصيل الطلب:</label>
+                <label class="text-xs text-slate-500 block mb-1">تفاصيل الطلب:</label>
                 <textarea id="reqDetails" rows="3" placeholder="اكتب تعليقك هنا..." class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs"></textarea>
             </div>
             <div class="flex gap-2 pt-2">
@@ -180,6 +169,7 @@
         let currentPunchState = 'دخول';
         let checkInTimeEpoch = null;
         let timerInterval = null;
+        let selectedDateStr = new Date().toLocaleDateString();
 
         window.onload = function() {
             const savedHrId = localStorage.getItem('darwin_emp_hrid');
@@ -217,23 +207,20 @@
                             document.getElementById('profileImg').src = emp.profileImg || 'https://via.placeholder.com/60';
                             document.getElementById('infoEmpId').innerText = emp.empId;
                             document.getElementById('infoNationalId').innerText = emp.nationalId || 'غير مسجل';
+                            document.getElementById('infoManagerId').innerText = emp.managerId ? 'HR ID: ' + emp.managerId : 'غير محدد';
                             
                             if(emp.role === 'supervisor') {
                                 document.getElementById('supervisorPanel').classList.remove('hidden');
                             }
 
-                            if(emp.finalNetPay && emp.finalNetPay > 0) {
-                                document.getElementById('menuPayDisplay').innerText = emp.finalNetPay + " جنية";
-                            }
-
                             document.getElementById('loginScreen').classList.add('hidden');
                             document.getElementById('dashboardScreen').classList.remove('hidden');
                             
-                            checkTodayAttendanceStatus(emp.empId);
+                            checkDateAttendanceStatus(emp.empId, selectedDateStr);
                             loadEmployeeRequests(emp.empId);
                         });
                     } else {
-                        if(saveToStorage) alert('بيانات غير صحيحة أو الحساب موقوف.');
+                        if(saveToStorage) alert('بيانات غير صحيحة.');
                         empLogout();
                     }
                 } else {
@@ -252,6 +239,7 @@
             document.getElementById(`nav-${tabName}`).className = "flex flex-col items-center text-blue-600 font-bold";
         }
 
+        // تفاعل شريط الأيام بحيث يقلب التاريخ المعروض فعلاً
         function renderDaysBar() {
             const daysBar = document.getElementById('daysBar');
             const now = new Date();
@@ -259,9 +247,10 @@
             for(let i = 3; i >= -3; i--) {
                 let d = new Date();
                 d.setDate(now.getDate() + i);
+                let dateStrKey = d.toLocaleDateString();
                 let isToday = (i === 0);
                 daysBar.innerHTML += `
-                    <div class="flex flex-col items-center p-2 rounded-2xl ${isToday ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-400'}">
+                    <div onclick="selectDateToView('${dateStrKey}', '${d.toLocaleDateString('ar-EG', { weekday: 'long', month: 'short', day: 'numeric' })}')" class="flex flex-col items-center p-2 rounded-2xl cursor-pointer transition ${isToday ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-400 hover:bg-slate-50'}">
                         <span class="text-sm">${d.getDate()}</span>
                         <span class="text-[10px] mt-0.5">${d.toLocaleDateString('ar-EG', { weekday: 'short' })}</span>
                     </div>
@@ -269,35 +258,13 @@
             }
         }
 
-        function loadEmployeeRequests(empId) {
-            onValue(ref(database, `companiesData/${currentCompany}/requests`), (snapshot) => {
-                const container = document.getElementById('requestsListContainer');
-                container.innerHTML = '';
-                let found = false;
-                if(snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        let req = child.val();
-                        if(req.empId === empId) {
-                            found = true;
-                            container.innerHTML += `
-                                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-right space-y-1">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xs font-bold text-blue-600">${req.type}</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${req.status==='مقبول'?'bg-emerald-100 text-emerald-700':req.status==='مرفوض'?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700'}">${req.status || 'قيد الانتظار'}</span>
-                                    </div>
-                                    <p class="text-xs text-slate-700">${req.details}</p>
-                                    <p class="text-[10px] text-slate-400">${req.createdAt}</p>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-                if(!found) container.innerHTML = '<p class="text-center text-xs text-slate-400 py-6">لا توجد طلبات مقدمة حالياً.</p>';
-            });
+        window.selectDateToView = function(dateKey, formattedTitle) {
+            selectedDateStr = dateKey;
+            document.getElementById('selectedDateHeader').innerText = `📅 عرض جدول يوم: ${formattedTitle}`;
+            if(currentEmp) checkDateAttendanceStatus(currentEmp.empId, dateKey);
         }
 
-        function checkTodayAttendanceStatus(empId) {
-            const todayStr = new Date().toLocaleDateString();
+        function checkDateAttendanceStatus(empId, dateStr) {
             onValue(ref(database, `companiesData/${currentCompany}/attendance`), (snapshot) => {
                 let hasIn = false;
                 let hasOut = false;
@@ -305,11 +272,8 @@
                 if(snapshot.exists()) {
                     snapshot.forEach(child => {
                         let log = child.val();
-                        if(log.empId === empId && log.time.includes(todayStr)) {
-                            if(log.type === 'دخول') {
-                                hasIn = true;
-                                if(log.timestamp) checkInTimeEpoch = log.timestamp;
-                            }
+                        if(log.empId === empId && log.time.includes(dateStr)) {
+                            if(log.type === 'دخول') hasIn = true;
                             if(log.type === 'خروج') hasOut = true;
                         }
                     });
@@ -317,39 +281,36 @@
 
                 const btn = document.getElementById('punchActionBtn');
                 const statusText = document.getElementById('punchStatusText');
+                const isTodayActive = dateStr === new Date().toLocaleDateString();
+
+                if(!isTodayActive) {
+                    statusText.innerText = `سجل يوم ${dateStr}: حضور وانصراف الأيام السابقة أرشيف معتمد.`;
+                    btn.innerText = "عرض أرشيف اليوم";
+                    btn.disabled = true;
+                    btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-2xl text-sm cursor-not-allowed";
+                    return;
+                }
 
                 if(!hasIn) {
                     currentPunchState = 'دخول';
                     statusText.innerText = "موعد تسجيل الحضور بموقع العمل متاح الآن";
                     btn.innerHTML = `<span>تسجيل الحضور (دخول)</span><span>➔</span>`;
                     btn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm flex items-center justify-center gap-2";
+                    btn.disabled = false;
                 } else if(hasIn && !hasOut) {
                     currentPunchState = 'خروج';
                     statusText.innerText = "تم تسجيل الحضور. يعمل العداد حتى انقضاء ساعات الشفت";
                     btn.innerHTML = `<span>تسجيل الانصراف (خروج)</span><span>←</span>`;
                     btn.className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm flex items-center justify-center gap-2";
-                    startWorkTimer();
+                    btn.disabled = false;
                 } else {
                     currentPunchState = 'مكتمل';
                     statusText.innerText = "✅ تم إتمام بصمات اليوم بنجاح.";
                     btn.innerText = "أتممت بصمات اليوم";
                     btn.disabled = true;
                     btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-2xl text-sm cursor-not-allowed";
-                    document.getElementById('workTimerDisplay').innerText = "مكتمل";
                 }
             });
-        }
-
-        function startWorkTimer() {
-            if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if(!checkInTimeEpoch) return;
-                const elapsedSecs = Math.floor((Date.now() - checkInTimeEpoch) / 1000);
-                const hrs = String(Math.floor(elapsedSecs / 3600)).padStart(2, '0');
-                const mins = String(Math.floor((elapsedSecs % 3600) / 60)).padStart(2, '0');
-                const secs = String(elapsedSecs % 60).padStart(2, '0');
-                document.getElementById('workTimerDisplay').innerText = `${hrs}:${mins}:${secs}`;
-            }, 1000);
         }
 
         window.openRequestModal = function() { document.getElementById('requestModal').classList.remove('hidden'); }
@@ -367,34 +328,22 @@
             }).then(() => {
                 alert('تم إرسال طلبك بنجاح للإدارة!');
                 closeRequestModal();
-                document.getElementById('reqDetails').value = '';
                 switchTab('requests');
             });
         }
 
         window.supervisorAction = function(type) {
             const targetId = document.getElementById('supTargetEmpId').value.trim();
-            if(!targetId) { alert('أدخل كود الموظف (HR ID)'); return; }
+            if(!targetId) { alert('أدخل كود الموظف'); return; }
 
             get(ref(database, `companiesData/${currentCompany}/employees/${targetId}`)).then(snap => {
                 if(snap.exists()) {
                     const targetEmp = snap.val();
                     push(ref(database, `companiesData/${currentCompany}/attendance`), {
-                        empId: targetEmp.empId,
-                        name: targetEmp.name,
-                        branch: empBranch ? empBranch.name : 'الفرع الرئيسي',
-                        type: type,
-                        time: new Date().toLocaleString(),
-                        timestamp: Date.now(),
-                        faceImage: 'بواسطة المشرف: ' + currentEmp.name,
-                        location: 'تسجيل إداري'
-                    }).then(() => {
-                        alert(`تم تسجيل (${type}) للموظف ${targetEmp.name} بنجاح!`);
-                        document.getElementById('supTargetEmpId').value = '';
-                    });
-                } else {
-                    alert('الموظف غير موجود!');
-                }
+                        empId: targetEmp.empId, name: targetEmp.name, branch: empBranch ? empBranch.name : 'الفرع',
+                        type: type, time: new Date().toLocaleString(), timestamp: Date.now(), location: 'إداري'
+                    }).then(() => alert(`تم تسجيل (${type}) للموظف ${targetEmp.name}`));
+                } else { alert('الموظف غير موجود!'); }
             });
         }
 
@@ -406,26 +355,17 @@
 
         window.startPunchProcess = function() {
             if(currentPunchState === 'مكتمل') return;
-
-            if(currentPunchState === 'خروج' && checkInTimeEpoch) {
-                const elapsedSecs = (Date.now() - checkInTimeEpoch) / 1000;
-                if(elapsedSecs < (6 * 3600)) {
-                    alert('عذراً، لا يمكنك تسجيل الانصراف قبل مرور 6 ساعات عمل كاملة!');
-                    return;
-                }
-            }
-
             document.getElementById('cameraContainer').classList.remove('hidden');
             navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
                 videoStream = stream;
                 document.getElementById('videoElement').srcObject = stream;
-                document.getElementById('punchActionBtn').innerText = `📸 التقاط الوجه وتأكيد (${currentPunchState})`;
+                document.getElementById('punchActionBtn').innerText = `📸 التقاط وتأكيد (${currentPunchState})`;
                 document.getElementById('punchActionBtn').setAttribute('onclick', 'executePunch()');
-            }).catch(() => { alert('فشل تشغيل كاميرا الهاتف.'); });
+            }).catch(() => { alert('فشل تشغيل الكاميرا.'); });
         }
 
         window.executePunch = function() {
-            if (!empBranch) { alert("ليس لديك موقع عمل أو فرع محدد!"); return; }
+            if (!empBranch) { alert("ليس لديك موقع عمل محدد!"); return; }
             if (!navigator.geolocation) { alert("المتصفح لا يدعم الـ GPS"); return; }
 
             navigator.geolocation.getCurrentPosition((position) => {
@@ -436,34 +376,24 @@
                 if(distance < 0.05) {
                     const video = document.getElementById('videoElement');
                     const canvas = document.getElementById('canvasElement');
-                    if(video.videoWidth === 0) { alert("انتظر حتى تفتح الكاميرا."); return; }
-
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth || 320;
+                    canvas.height = video.videoHeight || 240;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const faceImage = canvas.toDataURL('image/png');
                     const locStr = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`;
 
-                    document.getElementById('locationGpsText').innerText = "📍 الموقع الحالي: " + locStr;
-
                     push(ref(database, `companiesData/${currentCompany}/attendance`), {
-                        empId: currentEmp.empId,
-                        name: currentEmp.name,
-                        branch: empBranch.name,
-                        type: currentPunchState,
-                        time: new Date().toLocaleString(),
-                        timestamp: Date.now(),
-                        faceImage: faceImage,
-                        location: locStr
+                        empId: currentEmp.empId, name: currentEmp.name, branch: empBranch.name,
+                        type: currentPunchState, time: new Date().toLocaleString(), timestamp: Date.now(),
+                        faceImage: faceImage, location: locStr
                     }).then(() => {
-                        alert(`تم تسجيل (${currentPunchState}) بنجاح داخل نطاق موقع العمل موثق بالـ GPS والوجه!`);
+                        alert(`تم تسجيل (${currentPunchState}) بنجاح داخل موقع العمل!`);
                         if(videoStream) videoStream.getTracks().forEach(t => t.stop());
                         location.reload();
                     });
-
                 } else {
-                    alert(`أنت خارج النطاق الجغرافي لموقع العمل المحدد (${empBranch.name})!`);
+                    alert(`أنت خارج النطاق الجغرافي لموقع العمل (${empBranch.name})!`);
                 }
             }, () => { alert('يرجى تفعيل موقعك الجغرافي (GPS).'); });
         }
