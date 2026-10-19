@@ -9,19 +9,19 @@
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
 <body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
-    <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
+    <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700">
         <div class="text-center mb-6">
             <h1 class="text-3xl font-bold text-blue-400">DARWIN HR</h1>
-            <p class="text-slate-400 text-sm mt-1">نظام الحضور والانصراف السحابي</p>
+            <p class="text-slate-400 text-sm mt-1">نظام الموارد البشرية السحابي</p>
         </div>
         <div class="space-y-4">
             <div>
                 <label class="block text-sm font-medium mb-1">أدخل كود الشركة:</label>
-                <input type="text" id="companyCodeInput" placeholder="مثال: DRW-XXXXXX" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-center tracking-widest font-bold text-lg uppercase focus:outline-none focus:border-blue-500">
+                <input type="text" id="companyCodeInput" placeholder="مثال: DRW-XXXXXX" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-center tracking-widest font-bold text-lg uppercase focus:outline-none focus:border-blue-500">
             </div>
-            <button onclick="verifyCompanyCode()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-lg transition shadow-lg">دخول للنظام</button>
-            <div class="text-center mt-4">
-                <a href="super-admin.html" class="text-xs text-slate-500 hover:text-slate-300">دخول المالك (Super Admin)</a>
+            <button onclick="verifyCompanyCode()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl transition shadow-lg">دخول لنظام الشركة</button>
+            <div class="text-center mt-6">
+                <a href="#" onclick="accessSuperAdmin()" class="text-xs text-slate-500 hover:text-slate-300">إدارة النظام العليا (Super Admin)</a>
             </div>
         </div>
     </div>
@@ -30,12 +30,16 @@
         import { database, ref, get } from "./firebase-config.js";
         window.verifyCompanyCode = function() {
             const code = document.getElementById('companyCodeInput').value.trim().toUpperCase();
-            if(!code) { alert('الرجاء إدخال الكود'); return; }
+            if(!code) { alert('الرجاء إدخال كود الشركة'); return; }
             
             get(ref(database, 'companies/' + code)).then((snapshot) => {
                 if(snapshot.exists()) {
                     const comp = snapshot.val();
                     if(comp.status === 'active') {
+                        if(comp.expireDate && new Date() > new Date(comp.expireDate)) {
+                            alert('عذراً، لقد انتهى اشتراك هذه الشركة الشهري!');
+                            return;
+                        }
                         localStorage.setItem('darwin_current_company', code);
                         window.location.href = 'company-admin.html';
                     } else {
@@ -45,6 +49,15 @@
                     alert('الكود غير صحيح!');
                 }
             });
+        }
+
+        window.accessSuperAdmin = function() {
+            let secret = prompt("أدخل كود الأمان الخاص بالمالك:");
+            if(secret === "darwin_master_2026") {
+                window.location.href = 'super-admin.html';
+            } else {
+                alert("كود غير صحيح!");
+            }
         }
     </script>
 </body>
