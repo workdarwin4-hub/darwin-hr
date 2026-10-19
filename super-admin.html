@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARWIN HR - لوحة تحكم السوبر أدمن المطلقة</title>
+    <title>DARWIN HR - لوحة تحكم السوبر أدمن</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
@@ -14,7 +14,7 @@
     <div id="superLoginModal" class="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-6 text-center">
         <div>
             <h1 class="text-3xl font-extrabold text-red-500 mb-1">SUPER ADMIN</h1>
-            <p class="text-xs text-slate-400">لوحة التحكم العليا وإدارة النظام بالكامل</p>
+            <p class="text-xs text-slate-400">لوحة التحكم العليا وإدارة النظام والشركات</p>
         </div>
         <div class="space-y-4 text-right">
             <div>
@@ -29,69 +29,138 @@
     </div>
 
     <!-- لوحة تحكم السوبر أدمن بعد الدخول -->
-    <div id="superDashboard" class="hidden max-w-4xl w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-8">
+    <div id="superDashboard" class="hidden max-w-5xl w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-8">
         <header class="flex justify-between items-center border-b border-slate-800 pb-4">
             <div>
                 <h1 class="text-2xl font-bold text-red-400">👑 مركز السوبر أدمن المسيطر</h1>
-                <p class="text-slate-400 text-xs mt-1">تغيير الباسورد الرئيسي والتحكم في حالة السيستم بالكامل</p>
+                <p class="text-slate-400 text-xs mt-1">إضافة الشركات وتوليد الأكواد التلقائية لأصحاب الشركات للتحكم بموظفيهم</p>
             </div>
             <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold">تسجيل خروج</button>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- تغيير باسورد السوبر أدمن (مع حذف القديم نهائياً) -->
+            <!-- 1. إنشاء شركة جديدة وتوليد كود تلقائي -->
             <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h2 class="text-base font-bold text-amber-400">🔑 تغيير كلمة مرور السوبر أدمن</h2>
-                <input type="password" id="newSuperPass" placeholder="كلمة المرور الجديدة" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
-                <button onclick="changeSuperPassword()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2.5 rounded-xl text-xs">تغيير وحذف القديمة نهائياً</button>
-                <p class="text-[10px] text-slate-500">مفتاح الطوارئ الاحتياطي الثابت: <span class="font-mono text-slate-300">darwin_master_2026</span></p>
+                <h2 class="text-base font-bold text-blue-400">🏢 إضافة شركة جديدة وتوليد كود الدخول</h2>
+                <input type="text" id="companyNameInput" placeholder="اسم الشركة (مثال: شركة النور للتجارة)" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
+                <input type="text" id="ownerNameInput" placeholder="اسم صاحب الشركة / المدير المسئول" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
+                <button onclick="generateAndSaveCompany()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-2.5 rounded-xl text-xs">إنشاء الشركة وتوليد كود الدخول تلقائياً</button>
+                
+                <div class="pt-2">
+                    <p class="text-xs text-slate-400 mb-2 font-bold">الشركات المسجلة وأكواد دخولها:</p>
+                    <div id="companiesListContainer" class="space-y-2 max-h-48 overflow-y-auto text-xs">
+                        <p class="text-slate-500">جاري جلب الشركات...</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- تشغيل أو تعطيل السيستم بالكامل -->
-            <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h2 class="text-base font-bold text-red-400">⚡ إيقاف أو تشغيل السيستم (Kill Switch)</h2>
-                <p class="text-xs text-slate-400">تعطيل التطبيق يمنع كل الموظفين والشركات من الدخول فورا للصيانة:</p>
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <button onclick="setSystemStatus(true)" class="bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-xl text-xs">🟢 تشغيل السيستم</button>
-                    <button onclick="setSystemStatus(false)" class="bg-red-600 hover:bg-red-700 font-bold py-3 rounded-xl text-xs">🔴 تعطيل السيستم صيانة</button>
+            <!-- 2. الأمان وحالة السيستم -->
+            <div class="space-y-6">
+                <!-- تغيير باسورد السوبر أدمن -->
+                <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
+                    <h2 class="text-base font-bold text-amber-400">🔑 تغيير كلمة مرور السوبر أدمن</h2>
+                    <input type="password" id="newSuperPass" placeholder="كلمة المرور الجديدة" class="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl text-sm">
+                    <button onclick="changeSuperPassword()" class="w-full bg-amber-600 hover:bg-amber-700 font-bold py-2.5 rounded-xl text-xs">تغيير وحذف القديمة نهائياً</button>
+                    <p class="text-[10px] text-slate-500">مفتاح الطوارئ الاحتياطي الثابت: <span class="font-mono text-slate-300">darwin_master_2026</span></p>
+                </div>
+
+                <!-- تشغيل أو تعطيل السيستم بالكامل -->
+                <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
+                    <h2 class="text-base font-bold text-red-400">⚡ إيقاف أو تشغيل السيستم (Kill Switch)</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setSystemStatus(true)" class="bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-xl text-xs">🟢 تشغيل السيستم</button>
+                        <button onclick="setSystemStatus(false)" class="bg-red-600 hover:bg-red-700 font-bold py-3 rounded-xl text-xs">🔴 تعطيل السيستم صيانة</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import { database, ref, set, get, update } from "./firebase-config.js";
+        import { database, ref, set, get, onValue, remove } from "./firebase-config.js";
 
         window.loginSuperAdmin = async function() {
             const pass = document.getElementById('superPassInput').value.trim();
             if(!pass) { alert('أدخل كلمة المرور'); return; }
 
             const snap = await get(ref(database, 'superAdmin/customPassword'));
-            let validPass = "darwin_master_2026"; // الباسورد الاحتياطي للطوارئ
+            let validPass = "darwin_master_2026";
             if(snap.exists()) validPass = snap.val();
 
             if(pass === validPass || pass === "darwin_master_2026") {
                 document.getElementById('superLoginModal').classList.add('hidden');
                 document.getElementById('superDashboard').classList.remove('hidden');
+                loadAllCompanies();
             } else {
                 alert('كلمة مرور السوبر أدمن غير صحيحة!');
+            }
+        }
+
+        // توليد كود تلقائي فريد لكل شركة جديدة
+        window.generateAndSaveCompany = function() {
+            const companyName = document.getElementById('companyNameInput').value.trim();
+            const ownerName = document.getElementById('ownerNameInput').value.trim();
+
+            if(!companyName || !ownerName) { alert('أدخل اسم الشركة واسم صاحبها'); return; }
+
+            // توليد كود فريد تلقائياً (مثال: COMP-8492)
+            const autoCode = 'COMP-' + Math.floor(1000 + Math.random() * 9000);
+
+            set(ref(database, `companies/${autoCode}`), {
+                companyCode: autoCode,
+                name: companyName,
+                owner: ownerName,
+                createdAt: new Date().toLocaleString()
+            }).then(() => {
+                alert(`🎉 تم إنشاء الشركة بنجاح!\nاسم الشركة: ${companyName}\nصاحبها: ${ownerName}\n\n🔑 كود الدخول الخاص به (يستخدمه لفتح لوحة الأدمن الخاصة به): [${autoCode}]`);
+                document.getElementById('companyNameInput').value = '';
+                document.getElementById('ownerNameInput').value = '';
+            });
+        }
+
+        function loadAllCompanies() {
+            onValue(ref(database, 'companies'), (snapshot) => {
+                const container = document.getElementById('companiesListContainer');
+                container.innerHTML = '';
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const comp = child.val();
+                        const key = child.key;
+                        container.innerHTML += `
+                            <div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center border border-slate-800">
+                                <div>
+                                    <p class="font-bold text-blue-400">${comp.name}</p>
+                                    <p class="text-[11px] text-slate-300">المالك: ${comp.owner || 'غير محدد'}</p>
+                                    <p class="text-[10px] text-amber-400 font-mono mt-0.5">كود الدخول: ${key}</p>
+                                </div>
+                                <button onclick="deleteCompany('${key}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">حذف</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<p class="text-slate-500">لا توجد شركات مسجلة بعد.</p>';
+                }
+            });
+        }
+
+        window.deleteCompany = function(code) {
+            if(confirm(`هل أنت متأكد من حذف شركة بكود [${code}] نهائياً؟`)) {
+                remove(ref(database, `companies/${code}`)).then(() => alert('تم حذف الشركة بنجاح!'));
             }
         }
 
         window.changeSuperPassword = function() {
             const newPass = document.getElementById('newSuperPass').value.trim();
             if(!newPass) { alert('أدخل كلمة المرور الجديدة'); return; }
-
-            // تحديث الباسورد الجديد وحذف القديم تلقائياً
             set(ref(database, 'superAdmin/customPassword'), newPass).then(() => {
-                alert('تم تغيير باسورد السوبر أدمن بنجاح ومسح القديم نهائياً!');
+                alert('تم تغيير باسورد السوبر أدمن ومسح القديم نهائياً!');
                 document.getElementById('newSuperPass').value = '';
             });
         }
 
         window.setSystemStatus = function(status) {
             set(ref(database, 'systemSettings/isSystemActive'), status).then(() => {
-                alert(status ? 'تم تشغيل السيستم بنجاح لجميع المستخدمين!' : 'تم تعطيل السيستم للصيانة بنجاح!');
+                alert(status ? 'تم تشغيل السيستم بنجاح!' : 'تم تعطيل السيستم للصيانة!');
             });
         }
     </script>
