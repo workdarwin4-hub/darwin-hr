@@ -8,44 +8,94 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex items-center justify-center p-2">
 
-    <div id="loginScreen" class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-800 text-center">
-        <h1 class="text-2xl font-bold text-blue-400 mb-2">تسجيل دخول الموظف</h1>
-        <p class="text-xs text-slate-400 mb-6">أدخل رقم هاتفك وكود الـ HR ID</p>
+    <!-- شاشة تسجيل الدخول -->
+    <div id="loginScreen" class="hidden bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200 text-center">
+        <h1 class="text-2xl font-bold text-blue-600 mb-2">تسجيل دخول الموظف</h1>
+        <p class="text-xs text-slate-400 mb-6">أدخل رقم هاتفك وكود الـ HR ID (مرة واحدة فقط)</p>
         <div class="space-y-4">
-            <input type="text" id="loginPhone" placeholder="رقم الهاتف" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl text-center text-sm focus:outline-none">
-            <input type="text" id="loginHrId" placeholder="كود الـ HR ID" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl text-center text-sm focus:outline-none">
-            <button onclick="empLogin()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl shadow-lg transition">دخول للنظام</button>
+            <input type="text" id="loginPhone" placeholder="رقم الهاتف" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center text-sm focus:outline-none">
+            <input type="text" id="loginHrId" placeholder="كود الـ HR ID" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center text-sm focus:outline-none">
+            <button onclick="empLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-2xl shadow-lg transition text-sm">دخول للنظام</button>
         </div>
     </div>
 
-    <div id="dashboardScreen" class="hidden w-full max-w-md bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col justify-between min-h-[680px] p-5">
+    <!-- لوحة الموظف الرئيسية (مطابقة للصورة تماماً) -->
+    <div id="dashboardScreen" class="hidden w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between min-h-[720px] p-4 relative">
         <div>
-            <div class="flex items-center justify-between mb-4 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50">
-                <div class="text-right">
-                    <h2 id="profileName" class="font-bold text-base text-white"></h2>
-                    <p class="text-xs text-blue-400 mt-0.5">فرع: <span id="profileBranch"></span></p>
+            <!-- الهيدر الشخصي (مطابق للصورة: الصورة على اليمين، الاسم والمسمى الوظيفي والفرع على اليسار، وأيقونة الإشعارات) -->
+            <div class="flex items-center justify-between mb-4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <img id="profileImg" src="https://via.placeholder.com/60" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
+                    <div class="text-right">
+                        <h2 id="profileName" class="font-bold text-sm text-slate-900"></h2>
+                        <p id="profileRoleTitle" class="text-[11px] text-slate-400 mt-0.5">موظف ميداني</p>
+                        <p class="text-[10px] text-blue-500 font-bold">فرع: <span id="profileBranch"></span></p>
+                    </div>
                 </div>
-                <img id="profileImg" src="https://via.placeholder.com/60" class="w-12 h-12 rounded-full object-cover border-2 border-blue-500">
+                <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 shadow-sm">
+                    🔔
+                </div>
             </div>
 
-            <div class="bg-slate-800 p-4 rounded-3xl border border-slate-700 text-center space-y-3">
-                <div id="punchStatusText" class="text-xs font-bold text-blue-300">جارٍ التحقق من البصمة واليوم...</div>
+            <!-- شريط الأيام الأفقي (مطابق للصورة: التاريخ والشهر مع إبراز اليوم الحالي) -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-4 text-center">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-xs font-bold text-slate-400">📅 سجل الأيام</span>
+                    <span id="currentMonthYear" class="text-xs font-bold text-slate-800">أكتوبر 2026</span>
+                </div>
+                <div id="daysBar" class="flex justify-around items-center text-xs">
+                    <!-- توليد الأيام أفقياً -->
+                </div>
+            </div>
 
-                <div id="cameraContainer" class="relative rounded-2xl overflow-hidden border border-slate-700 bg-black hidden">
-                    <video id="videoElement" autoplay playsinline class="w-full h-40 object-cover"></video>
+            <!-- بطاقة الشفت والبصمة (مطابقة للصورة تماماً) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm mb-4 text-center space-y-3">
+                <div class="text-right">
+                    <p class="text-xs font-bold text-slate-800">مواعيد العمل الرسمية (Shift)</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">من 4:00 عصراً إلى 12:00 منتصف الليل</p>
+                </div>
+
+                <div id="cameraContainer" class="relative rounded-2xl overflow-hidden border border-slate-200 bg-black hidden">
+                    <video id="videoElement" autoplay playsinline class="w-full h-44 object-cover"></video>
                     <canvas id="canvasElement" class="hidden"></canvas>
                 </div>
 
-                <button id="punchActionBtn" onclick="startPunchProcess()" class="w-full bg-blue-600 hover:bg-blue-700 font-bold py-3 rounded-xl shadow-lg text-xs transition">
-                    📸 بصمة دخول (بالوجه فقط)
+                <div id="punchStatusText" class="text-xs font-bold text-blue-600 py-1">جاهز لتسجيل الحضور</div>
+
+                <button id="punchActionBtn" onclick="startPunchProcess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm flex items-center justify-center gap-2">
+                    <span>تسجيل الحضور</span>
+                    <span>➔</span>
                 </button>
+            </div>
+
+            <!-- صندوق لوحة تحكم المشرف (يظهر فقط لو الموظف مترقي مشرف Supervisor) -->
+            <div id="supervisorPanel" class="hidden bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-4 text-right space-y-2">
+                <p class="text-xs font-bold text-purple-700">⭐ لوحة تحكم المشرف (إدارة الفريق)</p>
+                <div class="space-y-2 text-xs">
+                    <input type="text" id="supTargetEmpId" placeholder="كود الموظف (HR ID)" class="w-full bg-white border border-purple-200 p-2 rounded-xl text-center">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="supervisorAction('دخول')" class="bg-purple-600 text-white font-bold py-2 rounded-xl">تسجيل حضور للموظف</button>
+                        <button onclick="supervisorAction('خروج')" class="bg-amber-600 text-white font-bold py-2 rounded-xl">تسجيل انصراف</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقة القبض المالي الشخصي للموظف (بدون أن يراها المشرف لغير نفسه) -->
+            <div class="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 rounded-2xl text-white text-center shadow-lg">
+                <p class="text-[11px] text-blue-200">صافي القبض المعتمد لشهر أكتوبر</p>
+                <h3 id="approvedPayDisplay" class="text-xl font-bold text-emerald-400 mt-1">قيد المراجعة من الإدارة</h3>
             </div>
         </div>
 
-        <div class="mt-4 text-center">
-            <button onclick="empLogout()" class="text-xs text-red-400 hover:text-red-300">تسجيل الخروج</button>
+        <!-- الشريط السفلي (مطابق للصورة: الجدول، لوحة المعلومات، طلباتي، القائمة) -->
+        <div class="bg-white border-t border-slate-100 pt-3 pb-1 flex justify-around items-center text-[11px] text-slate-500">
+            <button onclick="empLogout()" class="hover:text-red-500 flex flex-col items-center"><span>🚪</span><span>خروج</span></button>
+            <button class="flex flex-col items-center"><span>📋</span><span>طلباتي</span></button>
+            <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg -mt-6 cursor-pointer">＋</div>
+            <button class="flex flex-col items-center"><span>📊</span><span>لوحة المعلومات</span></button>
+            <button class="flex flex-col items-center text-blue-600 font-bold"><span>📅</span><span>الجدول</span></button>
         </div>
     </div>
 
@@ -58,12 +108,16 @@
         let empBranch = null;
         let videoStream = null;
         let currentPunchState = 'دخول';
-        let isDayOffBlocked = false;
 
         window.onload = function() {
             const savedHrId = localStorage.getItem('darwin_emp_hrid');
             const savedPhone = localStorage.getItem('darwin_emp_phone');
-            if(savedHrId && savedPhone) verifyAndLoadUser(savedHrId, savedPhone);
+            if(savedHrId && savedPhone) {
+                verifyAndLoadUser(savedHrId, savedPhone, false);
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+            renderDaysBar();
         }
 
         window.empLogin = function() {
@@ -84,30 +138,29 @@
                             localStorage.setItem('darwin_emp_phone', phone);
                         }
 
-                        const todayDayName = new Date().toLocaleDateString('ar-EG', { weekday: 'long' });
-                        if(emp.dayOff === todayDayName && !emp.unlockDayOff) {
-                            isDayOffBlocked = true;
-                        }
-
                         get(ref(database, `companiesData/${currentCompany}/branches/${emp.branchId}`)).then((bSnap) => {
                             if(bSnap.exists()) empBranch = bSnap.val();
                             document.getElementById('profileBranch').innerText = empBranch ? empBranch.name : 'فرع عام';
                             document.getElementById('profileName').innerText = emp.name;
                             document.getElementById('profileImg').src = emp.profileImg || 'https://via.placeholder.com/60';
                             
+                            // لو الموظف مترقي مشرف Supervisor، افتح له لوحة الإشراف المصغرة
+                            if(emp.role === 'supervisor') {
+                                document.getElementById('profileRoleTitle').innerText = "مشرف ميداني (Supervisor)";
+                                document.getElementById('supervisorPanel').classList.remove('hidden');
+                            }
+
+                            if(emp.finalNetPay && emp.finalNetPay > 0) {
+                                document.getElementById('approvedPayDisplay').innerText = emp.finalNetPay + " جنية";
+                            }
+
                             document.getElementById('loginScreen').classList.add('hidden');
                             document.getElementById('dashboardScreen').classList.remove('hidden');
                             
-                            if(isDayOffBlocked) {
-                                document.getElementById('punchStatusText').innerText = `⚠️ اليوم هو إجازتك الأسبوعية (${emp.dayOff}). البصمة مغلقة إلا بإذن الأدمن.`;
-                                document.getElementById('punchActionBtn').disabled = true;
-                                document.getElementById('punchActionBtn').className = "w-full bg-slate-700 font-bold py-3 rounded-xl text-xs text-slate-400 cursor-not-allowed";
-                            } else {
-                                checkTodayAttendanceStatus(emp.empId);
-                            }
+                            checkTodayAttendanceStatus(emp.empId);
                         });
                     } else {
-                        alert('بيانات غير صحيحة أو الحساب موقوف.');
+                        if(saveToStorage) alert('بيانات غير صحيحة أو الحساب موقوف.');
                         empLogout();
                     }
                 } else {
@@ -115,6 +168,23 @@
                     empLogout();
                 }
             });
+        }
+
+        function renderDaysBar() {
+            const daysBar = document.getElementById('daysBar');
+            const now = new Date();
+            daysBar.innerHTML = '';
+            for(let i = 3; i >= -3; i--) {
+                let d = new Date();
+                d.setDate(now.getDate() + i);
+                let isToday = (i === 0);
+                daysBar.innerHTML += `
+                    <div class="flex flex-col items-center p-2 rounded-2xl ${isToday ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-slate-400'}">
+                        <span class="text-sm">${d.getDate()}</span>
+                        <span class="text-[10px] mt-0.5">${d.toLocaleDateString('ar-EG', { weekday: 'short' })}</span>
+                    </div>
+                `;
+            }
         }
 
         function checkTodayAttendanceStatus(empId) {
@@ -138,19 +208,44 @@
 
                 if(!hasIn) {
                     currentPunchState = 'دخول';
-                    statusText.innerText = "الرجاء تسجيل بصمة (الدخول)";
-                    btn.innerText = "📸 بصمة دخول (بالوجه فقط)";
+                    statusText.innerText = "موعد تسجيل الحضور متاح الآن";
+                    btn.innerHTML = `<span>تسجيل الحضور</span><span>➔</span>`;
+                    btn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm flex items-center justify-center gap-2";
                 } else if(hasIn && !hasOut) {
                     currentPunchState = 'خروج';
-                    statusText.innerText = "تم تسجيل الدخول. يمكنك تسجيل (الخروج) نهاية الشفت";
-                    btn.innerText = "📸 بصمة خروج (بالوجه فقط)";
-                    btn.className = "w-full bg-amber-600 hover:bg-amber-700 font-bold py-3 rounded-xl shadow-lg text-xs transition";
+                    statusText.innerText = "تم تسجيل الحضور. يمكنك تسجيل الانصراف نهاية الشفت";
+                    btn.innerHTML = `<span>تسجيل الانصراف</span><span>←</span>`;
+                    btn.className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm flex items-center justify-center gap-2";
                 } else {
                     currentPunchState = 'مكتمل';
-                    statusText.innerText = "✅ لقد أكملت بصمتي اليوم بنجاح.";
-                    btn.innerText = "تم تسجيل بصمات اليوم";
+                    statusText.innerText = "✅ تم إتمام حضور وانصراف اليوم بنجاح.";
+                    btn.innerText = "أتممت بصمات اليوم";
                     btn.disabled = true;
-                    btn.className = "w-full bg-slate-700 font-bold py-3 rounded-xl text-xs text-slate-400 cursor-not-allowed";
+                    btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-2xl text-sm cursor-not-allowed";
+                }
+            });
+        }
+
+        window.supervisorAction = function(type) {
+            const targetId = document.getElementById('supTargetEmpId').value.trim();
+            if(!targetId) { alert('أدخل كود الموظف (HR ID)'); return; }
+
+            get(ref(database, `companiesData/${currentCompany}/employees/${targetId}`)).then(snap => {
+                if(snap.exists()) {
+                    const targetEmp = snap.val();
+                    push(ref(database, `companiesData/${currentCompany}/attendance`), {
+                        empId: targetEmp.empId,
+                        name: targetEmp.name,
+                        branch: empBranch ? empBranch.name : 'الفرع الرئيسي',
+                        type: type,
+                        time: new Date().toLocaleString(),
+                        faceImage: 'تم التسجيل بواسطة المشرف: ' + currentEmp.name
+                    }).then(() => {
+                        alert(`تم تسجيل (${type}) للموظف ${targetEmp.name} بنجاح!`);
+                        document.getElementById('supTargetEmpId').value = '';
+                    });
+                } else {
+                    alert('الموظف غير موجود بهذا الكود!');
                 }
             });
         }
@@ -162,12 +257,12 @@
         }
 
         window.startPunchProcess = function() {
-            if(currentPunchState === 'مكتمل' || isDayOffBlocked) return;
+            if(currentPunchState === 'مكتمل') return;
             document.getElementById('cameraContainer').classList.remove('hidden');
             navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
                 videoStream = stream;
                 document.getElementById('videoElement').srcObject = stream;
-                document.getElementById('punchActionBtn').innerText = `📸 التقاط الوجه وتسجيل (${currentPunchState})`;
+                document.getElementById('punchActionBtn').innerText = `📸 التقاط الوجه لتسجيل (${currentPunchState})`;
                 document.getElementById('punchActionBtn').setAttribute('onclick', 'executePunch()');
             }).catch(() => { alert('فشل تشغيل كاميرا الهاتف.'); });
         }
